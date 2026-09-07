@@ -1,3 +1,10 @@
+# v0.5.0 — Ship workspaces and space patrol comparisons
+
+- Isolate ships and group variations by loadout.
+- Structured patrol catalog, difficulty and Solo/Group matching, randomized-enemy markers.
+- Require explicit space-patrol confirmation; preserve legacy records for review.
+- Add weapon/ability and pet-source mean damage, DPS and deltas.
+
 # v0.4.0 — STO Shakedown
 
 - Rename product and retain LCARS appearance.

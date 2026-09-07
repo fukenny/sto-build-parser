@@ -30,18 +30,20 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
   assert.deepEqual(analyzed.fullLog.encounterIds,analyzed.encounters.map(e=>e.id));
   const a=(await post('build',{name:'Baseline',ship:'Test ship'})).value;
   const b=(await post('build',{name:'Candidate',ship:'Test ship'})).value;
-  const input={buildId:a.id,encounterId:analyzed.encounters[0].id,playerId:'P[1@2 Captain@account]',context:'Test / Advanced'};
+  const input={buildId:a.id,encounterId:analyzed.encounters[0].id,playerId:'P[1@2 Captain@account]',patrolId:'strike-at-seedea',difficulty:'Advanced',party:'Solo',spaceConfirmed:true};
+  assert.equal((await post('run',{...input,spaceConfirmed:false})).status,400);
+  assert.equal((await post('run',{...input,patrolId:'ground'})).status,400);
   assert.equal((await post('run',input)).status,200);
   assert.equal((await post('run',{...input,buildId:b.id})).status,400);
   assert.equal((await post('run',{...input,encounterId:analyzed.fullLog.id})).status,400);
-  const comparison=(await post('compare',{baseline:a.id,candidate:b.id,playerId:input.playerId,context:input.context})).value;
+  const comparison=(await post('compare',{baseline:a.id,candidate:b.id,playerId:input.playerId,...input})).value;
   assert.equal(comparison.baseline.count,1);assert.equal(comparison.candidate.count,0);
-  assert.match(comparison.message,/No matching runs/);
+  assert.match(comparison.message,/No matching confirmed runs/);
   const saved=(await (await fetch(base+'/api/state',{headers})).json());
   assert.equal(saved.profiles.length,1);assert.equal(saved.loadouts.length,1);
-  assert.equal((await post('run/edit',{id:saved.runs[0].id,buildId:b.id,context:'Corrected / Advanced'})).status,200);
+  assert.equal((await post('run/edit',{id:saved.runs[0].id,buildId:b.id,patrolId:'wanted',difficulty:'Elite',party:'Group',spaceConfirmed:true})).status,200);
   const edited=await(await fetch(base+'/api/state',{headers})).json();
-  assert.equal(edited.runs[0].context,'Corrected / Advanced');assert.equal(edited.runs[0].buildId,b.id);
+  assert.equal(edited.runs[0].patrolId,'wanted');assert.equal(edited.runs[0].buildId,b.id);
   assert.equal((await post('run/edit',{id:saved.runs[0].id,buildId:'missing',context:'Invalid'})).status,400);
   const persisted=JSON.parse(await readFile(path.join(temp,'data','state.json'),'utf8'));assert.equal(persisted.runs.length,1);assert.equal(persisted.builds.length,2);
  } finally {proc.kill();await once(proc,'exit').catch(()=>{});await rm(temp,{recursive:true,force:true});}

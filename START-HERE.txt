@@ -1,4 +1,10 @@
-STO SHAKEDOWN v0.4.0 - QUICK START
+NEW IN 0.5: Choose your ship workspace. Patrol category, mission, difficulty,
+and Solo/Group replace free-text labels. Confirm space-only completed combat.
+Older runs: Edit label / version to confirm patrol settings before comparing.
+Compare now includes weapon/ability and combined pet-source damage and DPS.
+Asterisk = randomized enemies can affect results. Pet ranks are not guessed.
+
+STO SHAKEDOWN v0.5.0 - QUICK START
 Created by Kenneth Solans
 
 1. Extract the complete Windows x64 portable ZIP into a writable folder.

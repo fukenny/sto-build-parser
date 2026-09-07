@@ -7,6 +7,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {parseFiles} from './lib/parser.mjs';
 import {compareRuns} from './lib/comparison.mjs';
+import {conditions,conditionKey,patrols} from './public/patrols.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const {version} = JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));
@@ -100,31 +101,37 @@ const server = http.createServer(async (req,res)=>{
         const encounter=analysis?.fullLog?.id===b.encounterId ? analysis.fullLog : analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
         demand(player && (player.total>0 || player.incoming>0 || player.survival?.receivedHull + player.survival?.receivedShield > 0),'Select an encounter and a player with recorded combat activity.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
-        const context=text(b.context,'an encounter and difficulty label');
+        const metadata=conditions(b),context=metadata.context;
+        demand(b.spaceConfirmed===true,'Confirm this selection is one complete space patrol with unchanged equipment. Ground combat is unsupported.');
         const encounterIds=encounter.encounterIds || [encounter.id];
         demand(!state.runs.some(r=>r.player.id===player.id && (r.encounterIds || [r.encounterId]).some(id=>encounterIds.includes(id))),'This selection overlaps evidence already saved for this player. The same combat cannot count as an independent run twice.');
         const run={id:randomUUID(),buildId:build.id,encounterId:encounter.id,context,player,stamp:encounter.stamp,duration:encounter.duration,file:analysis.file,parserVersion:analysis.parserVersion,savedAt:new Date().toISOString()};
         run.scope=encounter.scope || 'encounter'; run.encounterIds=encounterIds;
+        Object.assign(run,metadata,{spaceConfirmed:true});
         state.runs.push(run); await save(); return json(run);
       }
       if(url.pathname === '/api/run/edit') {
         const run=state.runs.find(r=>r.id===b.id); demand(run,'Choose a saved run.');
-        const context=text(b.context,'an encounter / difficulty label');
+        const metadata=conditions(b),context=metadata.context;
+        demand(b.spaceConfirmed===true,'Confirm this saved run covers one complete space patrol with unchanged equipment.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Choose a variation.');
         await writeFile(path.join(data,`backup-${Date.now()}-${randomUUID()}.json`),JSON.stringify(state,null,2));
-        run.context=context; run.buildId=build.id; await save(); return json(run);
+        Object.assign(run,metadata,{spaceConfirmed:true});run.context=context; run.buildId=build.id; await save(); return json(run);
       }
       if(url.pathname === '/api/compare') {
         demand(b.baseline!==b.candidate,'Choose two different versions.');
         const a=state.builds.find(x=>x.id===b.baseline), c=state.builds.find(x=>x.id===b.candidate);
         demand(a&&c,'Choose two build versions.'); demand(a.ship.toLowerCase()===c.ship.toLowerCase(),'Compare versions of the same ship.');
-        const eligible=state.runs.filter(r=>r.context===b.context && r.player.id===b.playerId);
+        demand(a.loadoutId===c.loadoutId,'Choose variations of the same loadout.');
+        const metadata=conditions(b);
+        const eligible=state.runs.filter(r=>conditionKey(r)===conditionKey(metadata) && r.spaceConfirmed && r.player.id===b.playerId);
         const selected=eligible.filter(r=>r.buildId===a.id || r.buildId===c.id);
         demand(new Set(selected.map(r=>r.scope || 'encounter')).size<=1,'These versions mix entire-log and individual encounter evidence. Use a separate encounter label for full-log sessions so like-for-like runs can be compared.');
         const result=compareRuns(eligible.filter(r=>r.buildId===a.id),eligible.filter(r=>r.buildId===c.id));
+        result.random=patrols.find(p=>p.id===metadata.patrolId).random;
         if(!result.baseline.count || !result.candidate.count) {
           const labels=build=>[...new Set(state.runs.filter(r=>r.buildId===build.id && r.player.id===b.playerId).map(r=>r.context))].join('; ') || 'no saved runs for this player';
-          result.message=`No matching runs for one side under “${b.context}”. Baseline labels: ${labels(a)}. Candidate labels: ${labels(c)}. Open Build versions and edit the saved run label if these were the same mission and difficulty.`;
+          result.message=`No matching confirmed runs for one side under “${metadata.context}”. Baseline labels: ${labels(a)}. Candidate labels: ${labels(c)}. Open the ship page and edit older runs to confirm their patrol, difficulty, and Solo / Group.`;
         }
         return json(result);
       }
@@ -135,7 +142,7 @@ const server = http.createServer(async (req,res)=>{
       res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Content-Disposition':'attachment; filename="START-HERE.txt"','X-Content-Type-Options':'nosniff'});
       return res.end(await readFile(path.join(root,'START-HERE.txt')));
     }
-    const assets={'/':'index.html','/app.js':'app.js','/style.css':'style.css'};
+    const assets={'/':'index.html','/app.js':'app.js','/patrols.js':'patrols.js','/style.css':'style.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
     if(url.pathname==='/') content=content.replace('__TOKEN__',token).replaceAll('__VERSION__',version);

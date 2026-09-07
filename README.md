@@ -1,4 +1,16 @@
-# STO Shakedown · v0.4.0 preview
+## v0.5.0: space patrol testing
+
+Choose **Current ship workspace** to isolate a ship. Ship profiles groups its variations under loadouts; Compare limits choices to one loadout.
+
+Saving now requires **Patrol category → Space patrol → Difficulty → Solo / Group**, plus confirmation that the selection is one complete space patrol with unchanged equipment and no ground combat. Solo is the default. The catalog uses 27 space patrol entries from the supplied in-game screenshots; Jupiter Station Showdown is excluded. An asterisk identifies known randomized enemy groups. Hard / Normal in Mirror patrol names remains separate from difficulty.
+
+**Existing runs are preserved.** Use Edit label / version on each older run to confirm its structured patrol conditions before comparing. Older labels are not guessed into missions or Solo/Group. Correction backups are retained.
+
+Comparison now includes mean damage and encounter DPS by weapon/ability and combined pet source. Missing sources contribute zero across matching runs; missing ability data remains unavailable. Identical pet names are combined. Advanced/Elite rank and hangar counts are not inferred: document two Advanced versus mixed Advanced/Elite in variation notes. Comparisons require matching player, loadout, patrol, difficulty, party, and combat scope.
+
+The app does not automatically detect ground records or prove mission completeness. Import only space-patrol selections and confirm them yourself. Random enemies and group composition may affect results.
+
+# STO Shakedown · v0.5.0 preview
 
 A local Windows combat parser for testing STO ship builds through damage and survivability. Created by Kenneth Solans, with an LCARS-inspired interface and an independent [fan-project notice](COPYRIGHT.md).
 
