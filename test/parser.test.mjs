@@ -26,4 +26,5 @@ test('malformed lines are visible, identities stable, critical shield records no
 test('comparison shows sample count and does not invent significance',()=>{
   const run=dps=>({duration:10,player:{dps,direct:dps*10,pets:0,incoming:0,healing:0}});
   const r=compareRuns([run(100),run(200)],[run(180)]);assert.equal(r.baseline.mean,150);assert.ok(Math.abs(r.delta-20)<1e-10);assert.match(r.message,/Early observation/);assert.equal(compareRuns([],[]).delta,null);
+  assert.equal(compareRuns([run(100)],[]).delta,null);
 });

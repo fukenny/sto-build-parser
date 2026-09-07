@@ -35,7 +35,10 @@ const server = http.createServer(async (req,res)=>{
     if(url.pathname.startsWith('/api/')) {
       demand(req.headers['x-sto-token'] === token, 'Open the app locally to access logs.');
       if(req.headers.origin) demand(req.headers.origin === `http://${host}`, 'Cross-origin access is not allowed.');
-      if(req.method === 'GET' && url.pathname === '/api/state') return json({...state,logs:await logs()});
+      if(req.method === 'GET' && url.pathname === '/api/state') {
+        try { return json({...state,logs:await logs()}); }
+        catch { return json({...state,logs:[],folderError:'The saved log folder is unavailable. Choose a folder in Log folder settings.'}); }
+      }
       demand(req.method === 'POST', 'Unsupported request.');
       const b = await body(req);
       if(url.pathname === '/api/folder') {
