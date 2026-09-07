@@ -1,0 +1,100 @@
+import http from 'node:http';
+import {readFile, writeFile, mkdir, rename, readdir, stat, realpath} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {randomBytes, randomUUID} from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {parseFile} from './lib/parser.mjs';
+import {compareRuns} from './lib/comparison.mjs';
+
+const root = path.dirname(fileURLToPath(import.meta.url));
+const data = process.env.STO_DATA_DIR || path.join(root, 'data');
+await mkdir(data, {recursive:true});
+const statePath = path.join(data, 'state.json');
+let state;
+try { state = JSON.parse(await readFile(statePath, 'utf8')); }
+catch(e) { if(e.code !== 'ENOENT') throw e; state = {folder:'', builds:[], runs:[]}; }
+const token = randomBytes(32).toString('hex');
+let saving = Promise.resolve(), analysis = null, parsing = false, picking = false;
+function save() { const snapshot = JSON.stringify(state, null, 2); saving = saving.then(async () => { await writeFile(statePath+'.tmp', snapshot); await rename(statePath+'.tmp',statePath); }); return saving; }
+function demand(condition, message) { if(!condition) throw new Error(message); }
+const text = (value, name, max=300) => { demand(typeof value === 'string' && value.trim() && value.length <= max, `Enter ${name} (up to ${max} characters).`); return value.trim(); };
+async function logs(folder=state.folder) {
+  if(!folder) return [];
+  const names = await readdir(folder, {withFileTypes:true});
+  return (await Promise.all(names.filter(x=>x.isFile() && /^combatlog.*\.log$/i.test(x.name)).map(async x=>{const s=await stat(path.join(folder,x.name)); return {name:x.name,size:s.size,modified:s.mtimeMs};}))).sort((a,b)=>b.modified-a.modified);
+}
+async function body(req) { let raw=''; for await (const chunk of req) {raw+=chunk; demand(raw.length <= 100000,'Request too large.');} return JSON.parse(raw||'{}'); }
+const server = http.createServer(async (req,res)=>{
+  const json = (obj,code=200)=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'}); res.end(JSON.stringify(obj));};
+  try {
+    const host = `127.0.0.1:${server.address().port}`;
+    demand(req.headers.host === host, 'Invalid local host.');
+    const url = new URL(req.url, `http://${host}`);
+    if(url.pathname.startsWith('/api/')) {
+      demand(req.headers['x-sto-token'] === token, 'Open the app locally to access logs.');
+      if(req.headers.origin) demand(req.headers.origin === `http://${host}`, 'Cross-origin access is not allowed.');
+      if(req.method === 'GET' && url.pathname === '/api/state') return json({...state,logs:await logs()});
+      demand(req.method === 'POST', 'Unsupported request.');
+      const b = await body(req);
+      if(url.pathname === '/api/folder') {
+        const folder = await realpath(text(b.folder,'a folder path',2048));
+        demand((await stat(folder)).isDirectory(),'Select a folder.');
+        const found = await logs(folder);
+        demand(found.length > 0,'No combatlog*.log files found in that folder. Enable combat logging in STO or choose another folder.');
+        state.folder=folder; analysis=null; await save(); return json({folder,logs:found});
+      }
+      if(url.pathname === '/api/browse') {
+        demand(process.platform === 'win32','Paste your folder path instead.');
+        demand(!picking,'A folder picker is already open.'); picking=true;
+        try {
+          const script = "Add-Type -AssemblyName System.Windows.Forms; $picker = New-Object System.Windows.Forms.FolderBrowserDialog; $picker.Description = 'Select the STO GameClient combat log folder'; $picker.ShowNewFolderButton = $false; if ($picker.ShowDialog() -eq 'OK') { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write($picker.SelectedPath) }; $picker.Dispose()";
+          const result=await promisify(execFile)('powershell.exe',['-NoProfile','-STA','-Command',script],{windowsHide:true,timeout:120000});
+          return json({folder:result.stdout.trim()});
+        } finally {picking=false;}
+      }
+      if(url.pathname === '/api/analyze') {
+        demand(!parsing,'Another log is being read. Please wait.');
+        demand(typeof b.name === 'string' && (await logs()).some(l=>l.name===b.name),'Choose a listed combat log.');
+        parsing=true;
+        try {
+          const folder=state.folder;
+          const file=await realpath(path.join(folder,b.name));
+          demand(path.dirname(file).toLowerCase()===folder.toLowerCase(),'Log must be in the selected folder.');
+          const result=await parseFile(file);
+          demand(state.folder===folder,'Folder changed during import. Import again.');
+          analysis={...result,file:b.name}; return json(analysis);
+        } finally {parsing=false;}
+      }
+      if(url.pathname === '/api/build') {
+        const build={id:randomUUID(), name:text(b.name,'a version name'), ship:text(b.ship,'a ship name'), notes: typeof b.notes==='string' ? b.notes.slice(0,10000) : '', createdAt: new Date().toISOString()};
+        state.builds.push(build); await save(); return json(build);
+      }
+      if(url.pathname === '/api/run') {
+        const encounter=analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
+        demand(player && player.total>0,'Select an encounter and a player with outgoing damage.');
+        const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
+        const context=text(b.context,'an encounter and difficulty label');
+        demand(!state.runs.some(r=>r.encounterId===encounter.id && r.player.id===player.id),'This player’s encounter is already saved. It cannot count as an independent run twice.');
+        const run={id:randomUUID(),buildId:build.id,encounterId:encounter.id,context,player,stamp:encounter.stamp,duration:encounter.duration,file:analysis.file,parserVersion:analysis.parserVersion,savedAt:new Date().toISOString()};
+        state.runs.push(run); await save(); return json(run);
+      }
+      if(url.pathname === '/api/compare') {
+        demand(b.baseline!==b.candidate,'Choose two different versions.');
+        const a=state.builds.find(x=>x.id===b.baseline), c=state.builds.find(x=>x.id===b.candidate);
+        demand(a&&c,'Choose two build versions.'); demand(a.ship.toLowerCase()===c.ship.toLowerCase(),'Compare versions of the same ship.');
+        const eligible=state.runs.filter(r=>r.context===b.context && r.player.id===b.playerId);
+        return json(compareRuns(eligible.filter(r=>r.buildId===a.id),eligible.filter(r=>r.buildId===c.id)));
+      }
+      throw new Error('Unknown action.');
+    }
+    demand(req.method === 'GET','Unsupported request.');
+    const assets={'/':'index.html','/app.js':'app.js','/style.css':'style.css'};
+    if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
+    let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
+    if(url.pathname==='/') content=content.replace('__TOKEN__',token);
+    res.writeHead(200,{'Content-Type':url.pathname.endsWith('.js')?'text/javascript':url.pathname.endsWith('.css')?'text/css':'text/html','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"});res.end(content);
+  } catch(e) { json({error:e.message},400); }
+});
+server.listen(Number(process.env.PORT || 4317),'127.0.0.1',()=>console.log(`STO Build Parser: http://127.0.0.1:${server.address().port}`));
