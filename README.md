@@ -1,12 +1,15 @@
-# STO Build Parser
+# STO Build Parser · v0.2.0 preview
 
 A local Windows prototype for answering: **Did this change improve my ship?**
+
+Damage and survivability are the current focus, with a modest LCARS-inspired interface. [User guide](docs/USER-GUIDE.md) · [Metric definitions](docs/METRICS.md) · [Changelog](CHANGELOG.md) · [Development and releases](docs/DEVELOPMENT.md).
 
 ## Run
 
 Requires Node.js 22 or newer. No packages or build step are needed.
 
 Run `node server.mjs` from this folder, then open http://127.0.0.1:4317.
+Windows testers can double-click `Start.cmd` after installing Node.js. Extract the complete ZIP before running. This is a source preview, not a standalone installer.
 On Windows, `Start-STO-Build-Parser.ps1` starts the app and opens the browser. It also recognizes the Node runtime bundled with Codex on this development machine.
 
 1. Choose **Log folder**, browse or paste your own GameClient folder, and click **Use this folder**. No installation path is hardcoded.
@@ -23,8 +26,10 @@ The welcome page explains each step with direct navigation buttons and a worked 
 - Read-only import of rotated or unrotated combat logs, up to 512 MB per file.
 - Encounter segmentation, player selection, hull/shield damage, owned pet/summon attribution, incoming damage, and logged outgoing healing.
 - Ability contributions and event counts (not activation counts).
+- Survivability: incoming hull/shield damage, sources, damage-pressure timeline, largest damage record, and healing received by source and layer. No unvalidated death count or survival score.
 - Persistent build versions and run summaries, duplicate encounter protection.
 - Same-player, same-ship, same-context comparison with equal-weight run means, ranges, standard deviation, and descriptive contribution changes.
+- Version-compatible comparisons: old records display unavailable survivability metrics as “Not recorded.”
 - Local-only server on loopback, session request token, origin/host checks, escaped log text, and atomic state writes.
 
 ## Measurement limits

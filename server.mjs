@@ -9,6 +9,7 @@ import {parseFile} from './lib/parser.mjs';
 import {compareRuns} from './lib/comparison.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+const {version} = JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));
 const data = process.env.STO_DATA_DIR || path.join(root, 'data');
 await mkdir(data, {recursive:true});
 const statePath = path.join(data, 'state.json');
@@ -76,7 +77,7 @@ const server = http.createServer(async (req,res)=>{
       }
       if(url.pathname === '/api/run') {
         const encounter=analysis?.fullLog?.id===b.encounterId ? analysis.fullLog : analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
-        demand(player && player.total>0,'Select an encounter and a player with outgoing damage.');
+        demand(player && (player.total>0 || player.incoming>0 || player.survival?.receivedHull + player.survival?.receivedShield > 0),'Select an encounter and a player with recorded combat activity.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
         const context=text(b.context,'an encounter and difficulty label');
         const encounterIds=encounter.encounterIds || [encounter.id];
@@ -100,7 +101,7 @@ const server = http.createServer(async (req,res)=>{
     const assets={'/':'index.html','/app.js':'app.js','/style.css':'style.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
-    if(url.pathname==='/') content=content.replace('__TOKEN__',token);
+    if(url.pathname==='/') content=content.replace('__TOKEN__',token).replaceAll('__VERSION__',version);
     res.writeHead(200,{'Content-Type':url.pathname.endsWith('.js')?'text/javascript':url.pathname.endsWith('.css')?'text/css':'text/html','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"});res.end(content);
   } catch(e) { json({error:e.message},400); }
 });
