@@ -15,7 +15,7 @@ if (-not $expected -or (Get-FileHash -LiteralPath $nodeZip -Algorithm SHA256).Ha
 Expand-Archive -LiteralPath $nodeZip -DestinationPath (Join-Path $buildRoot 'node')
 $stage = Join-Path $buildRoot "sto-build-parser-$version"
 $sourceZip = Join-Path $buildRoot 'source.zip'
-& git -C $projectRoot archive --format=zip "--output=$sourceZip" HEAD
+& git -c "safe.directory=$projectRoot" -C $projectRoot archive --format=zip "--output=$sourceZip" HEAD
 if ($LASTEXITCODE -ne 0) { throw 'Could not export committed source.' }
 Expand-Archive -LiteralPath $sourceZip -DestinationPath $stage
 $runtime = Join-Path $stage 'runtime'
