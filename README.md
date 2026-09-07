@@ -15,6 +15,8 @@ On Windows, `Start-STO-Build-Parser.ps1` starts the app and opens the browser. I
 4. Save the selected encounter under that version with an encounter/difficulty label.
 5. Repeat for another version and compare the same character and conditions.
 
+The welcome page explains each step with direct navigation buttons and a worked Milwaukee example. **Combat selection** offers individual detected encounters or **Entire log**, which includes every valid record in the selected file. Enemy names in encounter labels are clues, not opponent filters. Entire-log DPS uses first-to-last record time, including idle gaps, and a file may span several missions or equipment changes. It cannot recover combat stored in other rotated files. Save only unchanged-build sessions under a distinct label. The app rejects overlapping saved encounters and mixing full-log evidence with individual encounters in a comparison.
+
 ## Included
 
 - Configurable, remembered folder with native Windows browse dialog and manual path entry.

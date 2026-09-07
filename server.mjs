@@ -75,12 +75,14 @@ const server = http.createServer(async (req,res)=>{
         state.builds.push(build); await save(); return json(build);
       }
       if(url.pathname === '/api/run') {
-        const encounter=analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
+        const encounter=analysis?.fullLog?.id===b.encounterId ? analysis.fullLog : analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
         demand(player && player.total>0,'Select an encounter and a player with outgoing damage.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
         const context=text(b.context,'an encounter and difficulty label');
-        demand(!state.runs.some(r=>r.encounterId===encounter.id && r.player.id===player.id),'This player’s encounter is already saved. It cannot count as an independent run twice.');
+        const encounterIds=encounter.encounterIds || [encounter.id];
+        demand(!state.runs.some(r=>r.player.id===player.id && (r.encounterIds || [r.encounterId]).some(id=>encounterIds.includes(id))),'This selection overlaps evidence already saved for this player. The same combat cannot count as an independent run twice.');
         const run={id:randomUUID(),buildId:build.id,encounterId:encounter.id,context,player,stamp:encounter.stamp,duration:encounter.duration,file:analysis.file,parserVersion:analysis.parserVersion,savedAt:new Date().toISOString()};
+        run.scope=encounter.scope || 'encounter'; run.encounterIds=encounterIds;
         state.runs.push(run); await save(); return json(run);
       }
       if(url.pathname === '/api/compare') {
@@ -88,6 +90,8 @@ const server = http.createServer(async (req,res)=>{
         const a=state.builds.find(x=>x.id===b.baseline), c=state.builds.find(x=>x.id===b.candidate);
         demand(a&&c,'Choose two build versions.'); demand(a.ship.toLowerCase()===c.ship.toLowerCase(),'Compare versions of the same ship.');
         const eligible=state.runs.filter(r=>r.context===b.context && r.player.id===b.playerId);
+        const selected=eligible.filter(r=>r.buildId===a.id || r.buildId===c.id);
+        demand(new Set(selected.map(r=>r.scope || 'encounter')).size<=1,'These versions mix entire-log and individual encounter evidence. Use a separate encounter label for full-log sessions so like-for-like runs can be compared.');
         return json(compareRuns(eligible.filter(r=>r.buildId===a.id),eligible.filter(r=>r.buildId===c.id)));
       }
       throw new Error('Unknown action.');

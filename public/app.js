@@ -5,7 +5,7 @@ const compact = value => new Intl.NumberFormat('en-US',{notation:'compact',maxim
 let state, analysis;
 function notice(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
 async function api(route,body){const r=await fetch('/api/'+route,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-STO-Token':document.querySelector('meta[name="sto-token"]').content},body:body===undefined?undefined:JSON.stringify(body)});const value=await r.json();if(!r.ok)throw new Error(value.error||'Request failed');return value;}
-function page(id){document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));}
+function page(id){window.scrollTo(0,0);document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));}
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));
 function action(id,fn){$(id).onclick=async()=>{const b=$(id);b.disabled=true;notice('');try{await fn();}catch(e){notice(e.message,true);}finally{b.disabled=false;}};}
 function options(id,items,placeholder){const select=$(id),previous=select.value;select.innerHTML=(placeholder?`<option value="">${esc(placeholder)}</option>`:'')+items.map(x=>`<option value="${esc(x.value)}">${esc(x.label)}</option>`).join('');if(items.some(x=>x.value===previous))select.value=previous;}
@@ -15,12 +15,37 @@ async function refresh(){state=await api('state');$('folder-path').value=state.f
 action('refresh',async()=>{await refresh();notice('Log list refreshed. Import a log again to read newly written events.');});
 action('browse',async()=>{notice('Select a folder in the Windows folder picker.');const r=await api('browse',{});if(r.folder){$('folder-path').value=r.folder;notice('Folder selected. Click “Use this folder” to validate and remember it.');}else notice('Folder selection cancelled.');});
 action('save-folder',async()=>{await api('folder',{folder:$('folder-path').value});analysis=null;$('results').hidden=true;$('empty').hidden=false;$('encounter').disabled=true;$('player').disabled=true;$('parse-note').textContent='';await refresh();page('analyze');notice('Folder saved. Select a combat log to analyze.');});
-action('analyze-button',async()=>{if(!$('log').value)throw new Error('Choose a combat log first.');notice('Reading combat log…');analysis=await api('analyze',{name:$('log').value});$('parse-note').textContent=`${num(analysis.valid)} records · ${analysis.encounters.length} detected encounters · ${analysis.skipped} skipped records · ${analysis.outOfOrder} out-of-order timestamps. Encounters use a 60-second gap; inspect each before saving.`;options('encounter',analysis.encounters.map((e,i)=>({value:e.id,label:`${i+1}. ${e.stamp} · ${e.duration.toFixed(1)}s · ${e.targets.slice(0,3).join(', ')||'Unknown targets'}`})));$('encounter').disabled=!analysis.encounters.length;selectEncounter();notice(analysis.encounters.length?'Log imported. Choose your encounter and character.':'No encounters with player damage found. Try another log.');});
-function selectEncounter(){const encounter=analysis?.encounters.find(e=>e.id===$('encounter').value);options('player',(encounter?.players||[]).map(p=>({value:p.id,label:`${p.name} · ${p.id}`})),'Choose your character');$('player').disabled=!encounter;renderPlayer();}
+action('analyze-button', async () => {
+  if (!$('log').value) throw new Error('Choose a combat log first.');
+  notice('Reading combat log…');
+  analysis = await api('analyze', {name: $('log').value});
+  $('parse-note').textContent = `${num(analysis.valid)} records · ${analysis.encounters.length} detected encounters · ${analysis.skipped} skipped records · ${analysis.outOfOrder} out-of-order timestamps.`;
+  options('encounter', [
+    ...(analysis.fullLog ? [{value: analysis.fullLog.id, label: 'Entire log · all recorded combat (including gaps)'}] : []),
+    ...analysis.encounters.map((e,i) => ({value:e.id, label:`Encounter ${i+1} · ${e.stamp} · ${e.duration.toFixed(1)}s · ${e.targets.slice(0,3).join(', ') || 'Unknown targets'}`}))
+  ]);
+  // Keep the single-encounter default; full-file analysis is an explicit choice.
+  if (analysis.encounters.length) $('encounter').value = analysis.encounters[0].id;
+  $('encounter').disabled = !analysis.encounters.length;
+  selectEncounter();
+  notice(analysis.encounters.length ? 'Log imported. Choose your combat selection and character.' : 'No encounters with player damage found. Try another log.');
+});
+function currentEncounter() {
+  return analysis?.fullLog?.id === $('encounter').value ? analysis.fullLog : analysis?.encounters.find(e => e.id === $('encounter').value);
+}
+function selectEncounter() {
+  const encounter = currentEncounter();
+  $('selection-note').textContent = encounter?.scope === 'full-log'
+    ? 'Entire log selected: includes every player and target in this file. DPS includes gaps between fights. This may contain multiple missions or build changes; it is not automatically one complete mission. Save only if the build stayed the same, and use a separate session label.'
+    : 'Individual encounter selected: all recorded players and enemies in this combat stretch. Enemy names are clues only. Select your character to inspect their performance.';
+  options('player', (encounter?.players || []).map(p => ({value:p.id,label:`${p.name} · ${p.id}`})), 'Choose your character');
+  $('player').disabled = !encounter;
+  renderPlayer();
+}
 $('encounter').onchange=selectEncounter;$('player').onchange=renderPlayer;
-function selection(){const encounter=analysis?.encounters.find(e=>e.id===$('encounter').value);return {encounter,player:encounter?.players.find(p=>p.id===$('player').value)};}
+function selection(){const encounter=currentEncounter();return {encounter,player:encounter?.players.find(p=>p.id===$('player').value)};}
 function metric(label,value,note){return `<div class="metric"><small>${label}</small><strong>${value}</strong><p>${note}</p></div>`;}
-function renderPlayer(){const {encounter:e,player:p}=selection();$('results').hidden=!p;$('empty').hidden=!!p;if(!p)return;$('metrics').innerHTML=metric('ENCOUNTER DPS',num(p.dps),`${e.duration.toFixed(1)}s encounter · hull + shield`)+metric('TOTAL DAMAGE',compact(p.total),`${compact(p.hull)} hull / ${compact(p.shield)} shield`)+metric('PETS & SUMMONS',compact(p.pets),`${p.total?(100*p.pets/p.total).toFixed(1):0}% of outgoing damage`)+metric('DAMAGE TAKEN',compact(p.incoming),`${compact(p.healing)} logged outgoing healing`);$('abilities').innerHTML=p.abilities.map(a=>{const share=p.total?100*a.total/p.total:0;return `<tr><td>${esc(a.name)}</td><td class="${a.pet?'pet':''}">${esc(a.source)}</td><td>${num(a.total)}</td><td>${share.toFixed(1)}%<div class="share"><i style="width:${share.toFixed(2)}%"></i></div></td><td>${num(a.total/e.duration)}</td><td>${num(a.events)}</td></tr>`;}).join('');}
+function renderPlayer(){const {encounter:e,player:p}=selection();$('results').hidden=!p;$('empty').hidden=!!p;if(!p)return;$('metrics').innerHTML=metric(e.scope==='full-log'?'FULL-LOG DPS':'ENCOUNTER DPS',num(p.dps),`${e.duration.toFixed(1)}s encounter · hull + shield`)+metric('TOTAL DAMAGE',compact(p.total),`${compact(p.hull)} hull / ${compact(p.shield)} shield`)+metric('PETS & SUMMONS',compact(p.pets),`${p.total?(100*p.pets/p.total).toFixed(1):0}% of outgoing damage`)+metric('DAMAGE TAKEN',compact(p.incoming),`${compact(p.healing)} logged outgoing healing`);$('abilities').innerHTML=p.abilities.map(a=>{const share=p.total?100*a.total/p.total:0;return `<tr><td>${esc(a.name)}</td><td class="${a.pet?'pet':''}">${esc(a.source)}</td><td>${num(a.total)}</td><td>${share.toFixed(1)}%<div class="share"><i style="width:${share.toFixed(2)}%"></i></div></td><td>${num(a.total/e.duration)}</td><td>${num(a.events)}</td></tr>`;}).join('');}
 action('create-build',async()=>{const build=await api('build',{ship:$('ship').value,name:$('build-name').value,notes:$('build-notes').value});await refresh();$('save-build').value=build.id;$('build-name').value='';$('build-notes').value='';notice(`Created ${build.ship} / ${build.name}. Return to Analyze a run to attach evidence.`);});
 action('save-run',async()=>{const {encounter,player}=selection();if(!player)throw new Error('Select a player first.');await api('run',{encounterId:encounter.id,playerId:player.id,buildId:$('save-build').value,context:$('context').value});await refresh();notice('Run saved to the selected build version.');});
 action('compare-button',async()=>{if(!$('compare-player').value||!$('compare-context').value)throw new Error('Select a player and encounter / difficulty.');const r=await api('compare',{baseline:$('baseline').value,candidate:$('candidate').value,playerId:$('compare-player').value,context:$('compare-context').value});const a=r.baseline,b=r.candidate;const delta=r.delta===null?'More evidence needed':`${r.delta>=0?'+':''}${r.delta.toFixed(1)}% observed DPS`;const row=(label,x,y)=>`<tr><td>${label}</td><td>${num(x)}</td><td>${num(y)}</td></tr>`;$('comparison').innerHTML=`<div class="eyebrow">OBSERVED COMPARISON · NO CAUSAL VERDICT</div><div class="verdict">${delta}</div><p>${esc(r.message)}</p><div class="table-wrap"><table><thead><tr><th>Metric</th><th>Baseline (${a.count} runs)</th><th>Candidate (${b.count} runs)</th></tr></thead><tbody>${row('Mean encounter DPS',a.mean,b.mean)}${row('Lowest run DPS',a.min,b.min)}${row('Highest run DPS',a.max,b.max)}${row('Run-to-run standard deviation',a.sd,b.sd)}${row('Ship / player DPS',a.direct,b.direct)}${row('Pets & summons DPS',a.pets,b.pets)}${row('Damage taken per second',a.incoming,b.incoming)}${row('Outgoing healing per second',a.healing,b.healing)}</tbody></table></div><p class="muted">Each run has equal weight. Match difficulty, team conditions, and piloting as closely as possible. Logged healing can include overhealing and is not a survival rating.</p>`;});
