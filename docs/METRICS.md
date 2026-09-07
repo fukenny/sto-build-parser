@@ -27,3 +27,14 @@ Each saved run has equal weight. DPS means, sample standard deviation, and range
 Missing schema-2 survival fields return null (displayed as “Not recorded”) when any run in that group lacks them; zero is reserved for measured zero. Old total incoming damage remains usable. Entire-log and individual encounter evidence cannot be mixed under one comparison label. Overlapping encounter IDs cannot be saved twice for the same player.
 
 Known limitation: extended/modified combat changes its content hash. Save completed encounters and avoid treating an updated copy of the same fight as an independent trial.
+
+## Combining rotated files (v0.4+)
+
+Multiple selected files are snapshotted, merged by event timestamp, and segmented
+using the same 60-second gap. Exact cross-file record overlap uses the maximum
+multiplicity in any one file, preserving repeated same-file hits. Removed overlap
+is reported. This cannot distinguish independently recorded identical events
+from duplicate copies; use adjacent files from the same logging session.
+Combined imports retain constituent encounter IDs to reject saving fragments
+again as independent evidence. Extended live files can change those IDs: import
+completed logs only. Limit: 12 files / 128 MB combined; one file remains 512 MB.

@@ -28,13 +28,13 @@ if not exist "%~dp0server.mjs" (
   pause
   exit /b 1
 )
-echo STO Build Parser - open http://127.0.0.1:4317 in your browser.
-"%stoNode%" -e "const http=require('node:http');const r=http.get('http://127.0.0.1:4317',s=>{let b='';s.on('data',d=>b+=d);s.on('end',()=>process.exit(b.includes('<title>STO Build Parser</title>')?10:0));});r.setTimeout(1500,()=>{r.destroy();process.exit(0)});r.on('error',()=>process.exit(0));"
+echo STO Shakedown - open http://127.0.0.1:4317 in your browser.
+"%stoNode%" -e "const http=require('node:http');const r=http.get('http://127.0.0.1:4317',s=>{let b='';s.on('data',d=>b+=d);s.on('end',()=>process.exit(b.includes('<title>STO Shakedown</title>')?10:0));});r.setTimeout(1500,()=>{r.destroy();process.exit(0)});r.on('error',()=>process.exit(0));"
 if errorlevel 10 (
   echo The app is already running. Opening it in your default browser.
   start "" "http://127.0.0.1:4317"
   exit /b 0
 )
 echo Keep this window open. Press Ctrl+C to stop.
-"%stoNode%" server.mjs
+"%stoNode%" server.mjs --open
 pause

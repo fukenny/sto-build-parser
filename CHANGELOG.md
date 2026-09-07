@@ -1,3 +1,11 @@
+# v0.4.0 — STO Shakedown
+
+- Rename product and retain LCARS appearance.
+- Add ship profiles, loadouts, and variations with migration backup.
+- Combine rotated files chronologically with overlap handling.
+- Edit saved run labels/variation; explain comparison exclusions; missing evidence is not zero damage.
+- Refresh quick-start and GitHub documentation; portable launcher opens browser and uses bundled runtime.
+
 # Changelog
 
 ## 0.3.0 — 2026-09-07

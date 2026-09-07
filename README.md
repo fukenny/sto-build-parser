@@ -1,65 +1,45 @@
-# STO Build Parser · v0.2.1 preview
+# STO Shakedown · v0.4.0 preview
 
-A local Windows prototype for answering: **Did this change improve my ship?**
+A local Windows combat parser for testing STO ship builds through damage and survivability. Created by Kenneth Solans, with an LCARS-inspired interface and an independent [fan-project notice](COPYRIGHT.md).
 
-Damage and survivability are the current focus, with a modest LCARS-inspired interface. [User guide](docs/USER-GUIDE.md) · [Metric definitions](docs/METRICS.md) · [Changelog](CHANGELOG.md) · [Development and releases](docs/DEVELOPMENT.md).
+## Start without installing software
 
-## Run
+Use the **Windows x64 portable ZIP**, extract it completely into a writable folder, and double-click **Start.cmd**. Node is included; no Node, npm, Codex, or additional installation is needed. The interface opens in your existing browser. Keep the launcher window open while using the app.
 
-Requires Node.js 22 or newer. No packages or build step are needed.
+GitHub's automatic **source-code ZIP** is for developers and requires Node 22+. The portable ZIP is built separately. Close any previous copy before starting an updated version. Back up and copy your old `data` folder into the new app folder to retain your workspace.
 
-Run `node server.mjs` from this folder, then open http://127.0.0.1:4317.
-Windows testers can double-click `Start.cmd` after installing Node.js. Extract the complete ZIP before running. This is a source preview, not a standalone installer.
-On Windows, `Start-STO-Build-Parser.ps1` starts the app and opens the browser. It also recognizes the Node runtime bundled with Codex on this development machine.
+## Workflow
 
-1. Choose **Log folder**, browse or paste your own GameClient folder, and click **Use this folder**. No installation path is hardcoded.
-2. Import a combat log. Select an encounter and then your character; the highest-damage player is never assumed to be you.
-3. Create a named build version with ship name, equipment, and change notes.
-4. Save the selected encounter under that version with an encounter/difficulty label.
-5. Repeat for another version and compare the same character and conditions.
+1. Enable `/combatlog 1` in STO, then choose your own GameClient log folder.
+2. In **Ship profiles**, create or reuse a ship and named loadout, then create a **Baseline** variation with equipment notes. This can happen before or after flying.
+3. Import a completed log. For a fight split across rotated files, Ctrl-select the adjacent files and analyze them together.
+4. Select the combat stretch and your character. Inspect damage and survivability.
+5. Attach the run to the variation actually equipped. Reuse the mission/difficulty label from the suggestions.
+6. Save additional unchanged runs to the same variation. Create a new variation only when you change equipment.
+7. Compare baseline and candidate under the same character and conditions. Several runs help reveal normal variation; one DPS increase is not proof.
 
-The welcome page explains each step with direct navigation buttons and a worked Milwaukee example. **Combat selection** offers individual detected encounters or **Entire log**, which includes every valid record in the selected file. Enemy names in encounter labels are clues, not opponent filters. Entire-log DPS uses first-to-last record time, including idle gaps, and a file may span several missions or equipment changes. It cannot recover combat stored in other rotated files. Save only unchanged-build sessions under a distinct label. The app rejects overlapping saved encounters and mixing full-log evidence with individual encounters in a comparison.
+Example: **Milwaukee → Beam Broadside → Baseline / Elite Valkyrie test**, with several runs per variation. Saved runs can be relabeled or moved using **Edit label / version**. Missing comparison evidence displays the available labels rather than inventing zero damage.
 
-## Included
+[Quick start](START-HERE.txt) · [User guide](docs/USER-GUIDE.md) · [Metrics](docs/METRICS.md) · [Changelog](CHANGELOG.md) · [Development](docs/DEVELOPMENT.md)
 
-- Configurable, remembered folder with native Windows browse dialog and manual path entry.
-- Read-only import of rotated or unrotated combat logs, up to 512 MB per file.
-- Encounter segmentation, player selection, hull/shield damage, owned pet/summon attribution, incoming damage, and logged outgoing healing.
-- Ability contributions and event counts (not activation counts).
-- Survivability: incoming hull/shield damage, sources, damage-pressure timeline, largest damage record, and healing received by source and layer. No unvalidated death count or survival score.
-- Persistent build versions and run summaries, duplicate encounter protection.
-- Same-player, same-ship, same-context comparison with equal-weight run means, ranges, standard deviation, and descriptive contribution changes.
-- Version-compatible comparisons: old records display unavailable survivability metrics as “Not recorded.”
-- Local-only server on loopback, session request token, origin/host checks, escaped log text, and atomic state writes.
+## Capabilities and limits
 
-## Measurement limits
+- Configurable local folder; raw logs are read in place and never uploaded or modified.
+- Hull/shield damage, weapon/ability contributions, owned pets/summons, incoming damage sources, damage timeline, and explicit healing received.
+- Ship profiles, loadouts, variations, saved evidence, and descriptive comparisons.
+- Single-file imports up to 512 MB; combined imports up to 12 files / 128 MB total. Combined records sort by timestamp and suppress exact cross-file overlap while preserving within-file repeat counts. Missing events cannot be recovered.
+- Encounters split after more than 60 seconds without valid records. **Entire log** covers all selected files and idle gaps, potentially multiple missions. Check timestamps and keep the build unchanged. Do not mix entire-log sessions with individual encounters in a comparison.
+- DPS uses hull plus shield damage divided by encounter duration, minimum one second. Other parsers may use different durations. Healing may include overhealing; no validated death count or survival rating.
+- Equipment and mission labels remain manual. No complete account inventory, buff activation tracking, automatic recommendations, or live monitoring.
 
-This is an initial independently implemented parser, not a certified replacement for existing parsers. Validate against a trusted parser before making costly equipment decisions.
+## Privacy and upgrades
 
-Encounters split at a gap greater than 60 seconds between valid log records. Long pauses can split fights and adjacent fights can merge; file rotation can cut an encounter. Inspect timestamps and targets. Detection does not establish map, difficulty, or completion.
+`data/state.json` holds settings, build notes, and summaries. The v0.4 migration retains saved run IDs and evidence, groups each ship's legacy versions under a loadout named after its first version, and names that first variation Baseline. A pre-migration backup is saved locally. Editing a saved run also creates a backup. Data, logs, runtimes, and build artifacts are excluded from Git and release source archives.
 
-DPS = outgoing hull + shield damage / full detected encounter duration (minimum one second). Other parsers may use player-active time. Negative magnitudes are not universally healing: negative shield magnitude with negative secondary magnitude represents shield damage. Hull HitPoints healing and shield healing are classified separately. Self-damage and `*` feedback events are excluded from outgoing offense. Owned sources are grouped as pets/summons, not specifically hangar pets. Unowned NPC damage is not guessed into player totals.
-
-Malformed records are counted and skipped. The final line in an actively written log may be incomplete; reimport after the fight. A growing file is read at its size when import begins. Saved summaries do not update automatically. A modified/extended encounter has a different content hash; users should save completed runs only.
-
-Comparisons are descriptive, not statistical confidence or causal recommendations. Equipment, ship identity, and encounter labels are user supplied. Logs cannot establish all equipped items, button presses, firing arcs, piloting intent, or effective healing. No automatic AI diagnoses, live monitoring, cross-file stitching, map recognition, equipment database, or installer yet.
-
-## Data
-
-`data/state.json` stores folder choice, build notes, and selected run summaries. Back up this folder to preserve your work. Raw logs are read in place and never changed. Data and all `.log` files are excluded from Git. There are no cloud calls in the app. Do not expose the server to a network.
+The server binds only to 127.0.0.1 and checks request tokens and origin/host headers. There are no cloud or AI calls. Each user runs their own local copy.
 
 ## Development
 
-`node --test` runs synthetic parser, comparison, and API tests. Real user logs are not included in the repository.
+Node standard-library server, vanilla HTML/CSS/JS, JSON persistence, no npm dependencies. Run `node server.mjs` or `npm start`. Run `npm test`. Set `PORT` or `STO_DATA_DIR` for isolated testing.
 
-Architecture: Node standard-library server, streaming parser, JSON persistence, and plain HTML/CSS/JS frontend. No dependencies. Port can be set with `PORT`; test data location with `STO_DATA_DIR`.
-
-Research references: [OSCR](https://github.com/STOCD/OSCR) and [STO-CLARE](https://github.com/raman78/STO-CLARE). OSCR is GPL-3.0; no source is vendored or imported here. A reuse/license decision remains open before integrating another parser. Star Trek styling is original CSS with no official assets.
-
-## Next milestones
-
-1. Cross-check encounter boundaries and damage totals against trusted parser output for the same runs.
-2. Add editable build/run metadata and backup/export UI.
-3. Establish Milwaukee beam-array vs. Hyper-Dual DBB experiments with controlled repeat runs.
-4. Improve cross-file encounter handling, map recognition, and live folder monitoring.
-5. Consider grounded explanations only after the measurements are validated.
+Research references: [OSCR](https://github.com/STOCD/OSCR) and [STO-CLARE](https://github.com/raman78/STO-CLARE). No source from those projects is vendored. The parser still needs wider cross-validation on real encounters.

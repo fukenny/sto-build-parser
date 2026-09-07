@@ -1,6 +1,6 @@
 # Creator and fan-project notice
 
-Original STO Build Parser application code, original interface styling, and documentation © 2026 Kenneth Solans.
+Original STO Shakedown application code, original interface styling, and documentation © 2026 Kenneth Solans.
 
 Created by Kenneth Solans as an independent fan project. Please preserve the creator credit when sharing and do not claim this project as your own.
 

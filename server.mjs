@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {parseFile} from './lib/parser.mjs';
+import {parseFiles} from './lib/parser.mjs';
 import {compareRuns} from './lib/comparison.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -16,6 +16,19 @@ const statePath = path.join(data, 'state.json');
 let state;
 try { state = JSON.parse(await readFile(statePath, 'utf8')); }
 catch(e) { if(e.code !== 'ENOENT') throw e; state = {folder:'', builds:[], runs:[]}; }
+if(!state.profiles) {
+  if(state.builds.length || state.runs.length) await writeFile(path.join(data,`pre-v040-${Date.now()}.json`),JSON.stringify(state,null,2));
+  state.profiles=[]; state.loadouts=[];
+  for(const build of state.builds) {
+    let profile=state.profiles.find(p=>p.name.toLowerCase()===build.ship.toLowerCase());
+    if(!profile) {profile={id:randomUUID(),name:build.ship};state.profiles.push(profile);}
+    let loadout=state.loadouts.find(l=>l.profileId===profile.id);
+    if(!loadout) {loadout={id:randomUUID(),profileId:profile.id,name:build.name};state.loadouts.push(loadout);build.originalName=build.name;build.name='Baseline';}
+    build.loadoutId=loadout.id;
+  }
+  state.schemaVersion=2;
+  await writeFile(statePath,JSON.stringify(state,null,2));
+}
 const token = randomBytes(32).toString('hex');
 let saving = Promise.resolve(), analysis = null, parsing = false, picking = false;
 function save() { const snapshot = JSON.stringify(state, null, 2); saving = saving.then(async () => { await writeFile(statePath+'.tmp', snapshot); await rename(statePath+'.tmp',statePath); }); return saving; }
@@ -60,19 +73,27 @@ const server = http.createServer(async (req,res)=>{
       }
       if(url.pathname === '/api/analyze') {
         demand(!parsing,'Another log is being read. Please wait.');
-        demand(typeof b.name === 'string' && (await logs()).some(l=>l.name===b.name),'Choose a listed combat log.');
+        const names=b.names || [b.name], listed=await logs();
+        demand(Array.isArray(names) && names.length>0 && names.length<=12 && new Set(names).size===names.length && names.every(name=>typeof name==='string' && listed.some(l=>l.name===name)),'Choose 1–12 listed combat logs.');
         parsing=true;
         try {
           const folder=state.folder;
-          const file=await realpath(path.join(folder,b.name));
-          demand(path.dirname(file).toLowerCase()===folder.toLowerCase(),'Log must be in the selected folder.');
-          const result=await parseFile(file);
+          const files=await Promise.all(names.map(name=>realpath(path.join(folder,name))));
+          demand(files.every(file=>path.dirname(file).toLowerCase()===folder.toLowerCase()),'Log must be in the selected folder.');
+          const result=await parseFiles(files);
           demand(state.folder===folder,'Folder changed during import. Import again.');
-          analysis={...result,file:b.name}; return json(analysis);
+          analysis={...result,file:names.join(' + '),files:names}; return json(analysis);
         } finally {parsing=false;}
       }
       if(url.pathname === '/api/build') {
+        let profile=state.profiles.find(p=>p.name.toLowerCase()===text(b.ship,'a ship name').toLowerCase());
+        const loadoutName=text(b.loadout || 'Default loadout','a loadout name');
+        const variationName=text(b.name,'a variation name');
+        if(!profile) {profile={id:randomUUID(),name:b.ship.trim()};state.profiles.push(profile);}
+        let loadout=state.loadouts.find(l=>l.profileId===profile.id && l.name.toLowerCase()===loadoutName.toLowerCase());
+        if(!loadout) {loadout={id:randomUUID(),profileId:profile.id,name:loadoutName};state.loadouts.push(loadout);}
         const build={id:randomUUID(), name:text(b.name,'a version name'), ship:text(b.ship,'a ship name'), notes: typeof b.notes==='string' ? b.notes.slice(0,10000) : '', createdAt: new Date().toISOString()};
+        build.name=variationName;build.loadoutId=loadout.id;
         state.builds.push(build); await save(); return json(build);
       }
       if(url.pathname === '/api/run') {
@@ -86,6 +107,13 @@ const server = http.createServer(async (req,res)=>{
         run.scope=encounter.scope || 'encounter'; run.encounterIds=encounterIds;
         state.runs.push(run); await save(); return json(run);
       }
+      if(url.pathname === '/api/run/edit') {
+        const run=state.runs.find(r=>r.id===b.id); demand(run,'Choose a saved run.');
+        const context=text(b.context,'an encounter / difficulty label');
+        const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Choose a variation.');
+        await writeFile(path.join(data,`backup-${Date.now()}-${randomUUID()}.json`),JSON.stringify(state,null,2));
+        run.context=context; run.buildId=build.id; await save(); return json(run);
+      }
       if(url.pathname === '/api/compare') {
         demand(b.baseline!==b.candidate,'Choose two different versions.');
         const a=state.builds.find(x=>x.id===b.baseline), c=state.builds.find(x=>x.id===b.candidate);
@@ -93,7 +121,12 @@ const server = http.createServer(async (req,res)=>{
         const eligible=state.runs.filter(r=>r.context===b.context && r.player.id===b.playerId);
         const selected=eligible.filter(r=>r.buildId===a.id || r.buildId===c.id);
         demand(new Set(selected.map(r=>r.scope || 'encounter')).size<=1,'These versions mix entire-log and individual encounter evidence. Use a separate encounter label for full-log sessions so like-for-like runs can be compared.');
-        return json(compareRuns(eligible.filter(r=>r.buildId===a.id),eligible.filter(r=>r.buildId===c.id)));
+        const result=compareRuns(eligible.filter(r=>r.buildId===a.id),eligible.filter(r=>r.buildId===c.id));
+        if(!result.baseline.count || !result.candidate.count) {
+          const labels=build=>[...new Set(state.runs.filter(r=>r.buildId===build.id && r.player.id===b.playerId).map(r=>r.context))].join('; ') || 'no saved runs for this player';
+          result.message=`No matching runs for one side under “${b.context}”. Baseline labels: ${labels(a)}. Candidate labels: ${labels(c)}. Open Build versions and edit the saved run label if these were the same mission and difficulty.`;
+        }
+        return json(result);
       }
       throw new Error('Unknown action.');
     }
@@ -109,4 +142,4 @@ const server = http.createServer(async (req,res)=>{
     res.writeHead(200,{'Content-Type':url.pathname.endsWith('.js')?'text/javascript':url.pathname.endsWith('.css')?'text/css':'text/html','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"});res.end(content);
   } catch(e) { json({error:e.message},400); }
 });
-server.listen(Number(process.env.PORT || 4317),'127.0.0.1',()=>console.log(`STO Build Parser: http://127.0.0.1:${server.address().port}`));
+server.listen(Number(process.env.PORT || 4317),'127.0.0.1',()=>{const url=`http://127.0.0.1:${server.address().port}`;console.log(`STO Shakedown: ${url}`);if(process.argv.includes('--open') && process.platform==='win32') execFile('cmd.exe',['/c','start','',url],{windowsHide:true});});

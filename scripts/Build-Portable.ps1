@@ -13,7 +13,7 @@ Invoke-WebRequest -Uri "https://nodejs.org/dist/v$NodeVersion/SHASUMS256.txt" -O
 $expected = (Get-Content -LiteralPath $sumsFile | Where-Object { $_.EndsWith('  ' + $nodeName) })
 if (-not $expected -or (Get-FileHash -LiteralPath $nodeZip -Algorithm SHA256).Hash.ToLower() -ne $expected.Split(' ')[0]) { throw 'Node archive checksum mismatch.' }
 Expand-Archive -LiteralPath $nodeZip -DestinationPath (Join-Path $buildRoot 'node')
-$stage = Join-Path $buildRoot "sto-build-parser-$version"
+$stage = Join-Path $buildRoot "sto-shakedown-$version"
 $sourceZip = Join-Path $buildRoot 'source.zip'
 & git -c "safe.directory=$projectRoot" -C $projectRoot archive --format=zip "--output=$sourceZip" HEAD
 if ($LASTEXITCODE -ne 0) { throw 'Could not export committed source.' }
@@ -24,7 +24,7 @@ $nodeExtracted = Join-Path $buildRoot "node\node-v$NodeVersion-win-x64"
 Copy-Item -LiteralPath (Join-Path $nodeExtracted 'node.exe') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $nodeExtracted 'LICENSE') -Destination $runtime
 "Node.js $NodeVersion win-x64`nOfficial source: https://nodejs.org/dist/v$NodeVersion/$nodeName`nSHA256: $($expected.Split(' ')[0])" | Set-Content -LiteralPath (Join-Path $runtime 'PROVENANCE.txt')
-$output = Join-Path (Split-Path $projectRoot -Parent) "sto-build-parser-v$version-windows-x64.zip"
+$output = Join-Path (Split-Path $projectRoot -Parent) "sto-shakedown-v$version-windows-x64.zip"
 Compress-Archive -LiteralPath $stage -DestinationPath $output -Force
 Write-Output "Portable archive: $output"
 Write-Output "Staging directory: $stage"

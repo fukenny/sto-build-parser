@@ -1,9 +1,14 @@
 {
-  "name": "sto-build-parser",
-  "version": "0.3.0",
+  "name": "sto-shakedown",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "Local STO build experiments grounded in combat logs",
-  "scripts": {"start": "node server.mjs", "test": "node --test"},
-  "engines": {"node": ">=22"}
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

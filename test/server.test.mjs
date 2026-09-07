@@ -36,6 +36,13 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
   assert.equal((await post('run',{...input,encounterId:analyzed.fullLog.id})).status,400);
   const comparison=(await post('compare',{baseline:a.id,candidate:b.id,playerId:input.playerId,context:input.context})).value;
   assert.equal(comparison.baseline.count,1);assert.equal(comparison.candidate.count,0);
+  assert.match(comparison.message,/No matching runs/);
+  const saved=(await (await fetch(base+'/api/state',{headers})).json());
+  assert.equal(saved.profiles.length,1);assert.equal(saved.loadouts.length,1);
+  assert.equal((await post('run/edit',{id:saved.runs[0].id,buildId:b.id,context:'Corrected / Advanced'})).status,200);
+  const edited=await(await fetch(base+'/api/state',{headers})).json();
+  assert.equal(edited.runs[0].context,'Corrected / Advanced');assert.equal(edited.runs[0].buildId,b.id);
+  assert.equal((await post('run/edit',{id:saved.runs[0].id,buildId:'missing',context:'Invalid'})).status,400);
   const persisted=JSON.parse(await readFile(path.join(temp,'data','state.json'),'utf8'));assert.equal(persisted.runs.length,1);assert.equal(persisted.builds.length,2);
  } finally {proc.kill();await once(proc,'exit').catch(()=>{});await rm(temp,{recursive:true,force:true});}
 });
