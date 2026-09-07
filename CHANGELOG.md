@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 — 2026-09-07
+
+- Fixed the Windows command launcher to locate Node in standard installation folders and Codex's bundled runtime when it is absent from PATH.
+- Added a Node 22+ check and a `Start.cmd --check-runtime` diagnostic.
+- Added a clear message when the ZIP has not been fully extracted.
+- When the app is already running, the launcher opens it instead of attempting to bind the same port again.
+
 ## 0.2.0 — 2026-09-07
 
 ### Added

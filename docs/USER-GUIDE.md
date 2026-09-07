@@ -1,8 +1,8 @@
-# User guide · v0.2.0 preview
+# User guide · v0.2.1 preview
 
 ## Install and start
 
-1. Install Node.js 22 or newer from https://nodejs.org if it is not already installed.
+1. Node.js 22 or newer is required. The launcher checks PATH, standard installation folders, and Codex's bundled runtime. If none is available, install Node from https://nodejs.org.
 2. Extract the source ZIP into a writable folder, such as Documents. Keep all files and subfolders together.
 3. Double-click `Start.cmd` on Windows. Open http://127.0.0.1:4317 in your browser and keep the command window open. No npm install is needed.
 4. To stop, press Ctrl+C in that window. You can also run `node server.mjs` directly. The PowerShell launcher is an alternative for users whose script policy allows it.

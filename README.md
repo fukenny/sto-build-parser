@@ -1,4 +1,4 @@
-# STO Build Parser · v0.2.0 preview
+# STO Build Parser · v0.2.1 preview
 
 A local Windows prototype for answering: **Did this change improve my ship?**
 
