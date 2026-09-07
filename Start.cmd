@@ -2,6 +2,7 @@
 setlocal
 cd /d "%~dp0"
 set "stoNode="
+if exist "%~dp0runtime\node.exe" set "stoNode=%~dp0runtime\node.exe"
 for /f "delims=" %%N in ('where node.exe 2^>nul') do if not defined stoNode set "stoNode=%%N"
 if not defined stoNode if exist "%ProgramFiles%\nodejs\node.exe" set "stoNode=%ProgramFiles%\nodejs\node.exe"
 if not defined stoNode if exist "%LOCALAPPDATA%\Programs\nodejs\node.exe" set "stoNode=%LOCALAPPDATA%\Programs\nodejs\node.exe"

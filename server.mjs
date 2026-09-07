@@ -98,6 +98,10 @@ const server = http.createServer(async (req,res)=>{
       throw new Error('Unknown action.');
     }
     demand(req.method === 'GET','Unsupported request.');
+    if (url.pathname === '/START-HERE.txt') {
+      res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Content-Disposition':'attachment; filename="START-HERE.txt"','X-Content-Type-Options':'nosniff'});
+      return res.end(await readFile(path.join(root,'START-HERE.txt')));
+    }
     const assets={'/':'index.html','/app.js':'app.js','/style.css':'style.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');

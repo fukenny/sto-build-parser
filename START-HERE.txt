@@ -1,0 +1,52 @@
+STO BUILD PARSER - QUICK START
+Fan project created by Kenneth Solans
+
+START THE APP
+1. Extract the entire Windows portable ZIP into a writable folder.
+2. Double-click Start.cmd. The portable edition includes Node; no install needed.
+3. Open http://127.0.0.1:4317 in your normal browser. Keep the launcher window open.
+   The source-only edition requires Node.js 22+.
+
+GET THE MOST OUT OF A BUILD TEST
+1. Before playing, type /combatlog 1 in STO chat to enable logging.
+2. In Log folder, select your installation's GameClient folder. Click Use this folder.
+3. In Analyze a run, select a completed log, then click Analyze log.
+4. Choose an encounter and YOUR character. The enemy names are clues, not filters.
+   Entire log includes all fights AND idle gaps in that file. It may span missions.
+5. Review damage: total DPS, weapon/ability contributions, and pets/summons.
+6. Review survivability: incoming hull/shield damage, sources, spikes, and healing.
+   Healing with no specified target is disclosed separately. No death count yet.
+7. In Build versions, enter your ship, baseline version name, and equipment notes.
+8. Return to Analyze a run. Select that version, label the mission/difficulty,
+   then click Save baseline evidence. Use one consistent label for comparable runs.
+9. Collect several comparable baseline runs. Three is a useful starting point.
+10. Change ONE thing. Create a new build version documenting exactly what changed.
+11. Collect and save several new runs using the same character, ship, and conditions.
+12. In Compare builds, select both versions, the character, and mission label.
+    Compare evidence. Look at the average AND the range, damage contributions,
+    incoming damage, and healing. One higher DPS run is not proof of improvement.
+
+EXAMPLE
+Milwaukee / Array baseline: 3 comparable runs.
+Milwaukee / DBB experiment: replace one array; collect 3 more comparable runs.
+Question: did overall output rise, and what happened to incoming damage/healing?
+
+REMEMBER
+- Save only completed runs with an unchanged build. Do not count the same fight twice.
+- Do not mix whole-log sessions with individual encounters under one comparison label.
+- Similar teammates, difficulty, mission, and flying make comparisons more useful.
+- Full-log mode cannot recover parts of a mission stored in other rotated files.
+- Equipment notes are manual. Logs show effects, not a complete equipped inventory.
+- Older saved runs may show Not recorded for newer metrics. That does not mean zero.
+- Back up the data folder before updating. It holds your build notes and saved runs.
+- This is a preview: results describe observations, not proven causes or recommendations.
+
+SHARING AND FEEDBACK
+Share the clean portable ZIP, never your working folder or data folder.
+The localhost link only works on YOUR computer. Each tester runs their own copy.
+Report the visible version, chosen log/encounter, expected result, and actual result.
+Preserve the creator credit. Please do not claim this fan project as your own.
+Not affiliated with or endorsed by Cryptic Studios or the owners of Star Trek.
+Star Trek and related names belong to their respective rights holders.
+
+More detail: docs/USER-GUIDE.md, docs/METRICS.md, and CHANGELOG.md.

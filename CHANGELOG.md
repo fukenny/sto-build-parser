@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-09-07
+
+- Stronger LCARS-inspired interface: black background, broad segmented color bands, curved rails, and clear section shortcuts.
+- Creator credit and fan-project disclaimer above Local Workspace.
+- Quick comparison checklist in the welcome page and downloadable START-HERE.txt shipped with the app.
+- Windows portable packaging includes an official Node runtime and its license; no Node or Codex installation required for that download.
+- Account inventory is documented as later work; no unsupported equipment inference is added to the demo.
+
 ## 0.2.1 — 2026-09-07
 
 - Fixed the Windows command launcher to locate Node in standard installation folders and Codex's bundled runtime when it is absent from PATH.
