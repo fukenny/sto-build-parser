@@ -5,7 +5,8 @@ import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {parseFiles} from './lib/parser.mjs';
+import {parseIsolated} from './lib/isolated-parser.mjs';
+import {createStore} from './lib/store.mjs';
 import {compareRuns} from './lib/comparison.mjs';
 import {conditions,conditionKey,patrols} from './public/patrols.js';
 
@@ -30,25 +31,34 @@ if(!state.profiles) {
   state.schemaVersion=2;
   await writeFile(statePath,JSON.stringify(state,null,2));
 }
-const token = randomBytes(32).toString('hex');
-let saving = Promise.resolve(), analysis = null, parsing = false, picking = false;
-function save() { const snapshot = JSON.stringify(state, null, 2); saving = saving.then(async () => { await writeFile(statePath+'.tmp', snapshot); await rename(statePath+'.tmp',statePath); }); return saving; }
+const store=createStore(state,statePath);
+let bootstrap=randomBytes(32).toString('hex');
+const bootstrapDeadline=Date.now()+300000;
+let token=null;
+let analysis = null, parsing = false, picking = false;
 function demand(condition, message) { if(!condition) throw new Error(message); }
 const text = (value, name, max=300) => { demand(typeof value === 'string' && value.trim() && value.length <= max, `Enter ${name} (up to ${max} characters).`); return value.trim(); };
-async function logs(folder=state.folder) {
+async function logs(folder=store.state.folder) {
   if(!folder) return [];
   const names = await readdir(folder, {withFileTypes:true});
   return (await Promise.all(names.filter(x=>x.isFile() && /^combatlog.*\.log$/i.test(x.name)).map(async x=>{const s=await stat(path.join(folder,x.name)); return {name:x.name,size:s.size,modified:s.mtimeMs};}))).sort((a,b)=>b.modified-a.modified);
 }
 async function body(req) { let raw=''; for await (const chunk of req) {raw+=chunk; demand(raw.length <= 100000,'Request too large.');} return JSON.parse(raw||'{}'); }
 const server = http.createServer(async (req,res)=>{
+  const state=store.state;
   const json = (obj,code=200)=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'}); res.end(JSON.stringify(obj));};
   try {
     const host = `127.0.0.1:${server.address().port}`;
     demand(req.headers.host === host, 'Invalid local host.');
     const url = new URL(req.url, `http://${host}`);
+    if(url.pathname==='/api/session') {
+      demand(req.method==='POST' && req.headers.origin===`http://${host}`,'Invalid session request.');
+      const b=await body(req);
+      demand(bootstrap && Date.now()<bootstrapDeadline && b.secret===bootstrap,'Start Shakedown from its launcher to open a private session.');
+      bootstrap=null;token=randomBytes(32).toString('hex');return json({token});
+    }
     if(url.pathname.startsWith('/api/')) {
-      demand(req.headers['x-sto-token'] === token, 'Open the app locally to access logs.');
+      demand(token && req.headers['x-sto-token'] === token, 'Open the app locally to access logs.');
       if(req.headers.origin) demand(req.headers.origin === `http://${host}`, 'Cross-origin access is not allowed.');
       if(req.method === 'GET' && url.pathname === '/api/state') {
         try { return json({...state,logs:await logs()}); }
@@ -61,7 +71,7 @@ const server = http.createServer(async (req,res)=>{
         demand((await stat(folder)).isDirectory(),'Select a folder.');
         const found = await logs(folder);
         demand(found.length > 0,'No combatlog*.log files found in that folder. Enable combat logging in STO or choose another folder.');
-        state.folder=folder; analysis=null; await save(); return json({folder,logs:found});
+        await store.transact(draft=>{draft.folder=folder;}); analysis=null; return json({folder,logs:found});
       }
       if(url.pathname === '/api/browse') {
         demand(process.platform === 'win32','Paste your folder path instead.');
@@ -74,19 +84,20 @@ const server = http.createServer(async (req,res)=>{
       }
       if(url.pathname === '/api/analyze') {
         demand(!parsing,'Another log is being read. Please wait.');
-        const names=b.names || [b.name], listed=await logs();
-        demand(Array.isArray(names) && names.length>0 && names.length<=12 && new Set(names).size===names.length && names.every(name=>typeof name==='string' && listed.some(l=>l.name===name)),'Choose 1–12 listed combat logs.');
         parsing=true;
         try {
-          const folder=state.folder;
+        const names=b.names || [b.name], listed=await logs();
+        demand(Array.isArray(names) && names.length>0 && names.length<=12 && new Set(names).size===names.length && names.every(name=>typeof name==='string' && listed.some(l=>l.name===name)),'Choose 1–12 listed combat logs.');
+          const folder=store.state.folder;
           const files=await Promise.all(names.map(name=>realpath(path.join(folder,name))));
           demand(files.every(file=>path.dirname(file).toLowerCase()===folder.toLowerCase()),'Log must be in the selected folder.');
-          const result=await parseFiles(files);
-          demand(state.folder===folder,'Folder changed during import. Import again.');
+          const result=await parseIsolated(files);
+          demand(store.state.folder===folder,'Folder changed during import. Import again.');
           analysis={...result,file:names.join(' + '),files:names}; return json(analysis);
         } finally {parsing=false;}
       }
       if(url.pathname === '/api/build') {
+        return json(await store.transact(async state=>{
         let profile=state.profiles.find(p=>p.name.toLowerCase()===text(b.ship,'a ship name').toLowerCase());
         const loadoutName=text(b.loadout || 'Default loadout','a loadout name');
         const variationName=text(b.name,'a variation name');
@@ -95,9 +106,11 @@ const server = http.createServer(async (req,res)=>{
         if(!loadout) {loadout={id:randomUUID(),profileId:profile.id,name:loadoutName};state.loadouts.push(loadout);}
         const build={id:randomUUID(), name:text(b.name,'a version name'), ship:text(b.ship,'a ship name'), notes: typeof b.notes==='string' ? b.notes.slice(0,10000) : '', createdAt: new Date().toISOString()};
         build.name=variationName;build.loadoutId=loadout.id;
-        state.builds.push(build); await save(); return json(build);
+        state.builds.push(build); return build;
+        }));
       }
       if(url.pathname === '/api/run') {
+        return json(await store.transact(async state=>{
         const encounter=analysis?.fullLog?.id===b.encounterId ? analysis.fullLog : analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
         demand(player && (player.total>0 || player.incoming>0 || player.survival?.receivedHull + player.survival?.receivedShield > 0),'Select an encounter and a player with recorded combat activity.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
@@ -108,15 +121,18 @@ const server = http.createServer(async (req,res)=>{
         const run={id:randomUUID(),buildId:build.id,encounterId:encounter.id,context,player,stamp:encounter.stamp,duration:encounter.duration,file:analysis.file,parserVersion:analysis.parserVersion,savedAt:new Date().toISOString()};
         run.scope=encounter.scope || 'encounter'; run.encounterIds=encounterIds;
         Object.assign(run,metadata,{spaceConfirmed:true});
-        state.runs.push(run); await save(); return json(run);
+        state.runs.push(run); return run;
+        }));
       }
       if(url.pathname === '/api/run/edit') {
+        return json(await store.transact(async state=>{
         const run=state.runs.find(r=>r.id===b.id); demand(run,'Choose a saved run.');
         const metadata=conditions(b),context=metadata.context;
         demand(b.spaceConfirmed===true,'Confirm this saved run covers one complete space patrol with unchanged equipment.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Choose a variation.');
         await writeFile(path.join(data,`backup-${Date.now()}-${randomUUID()}.json`),JSON.stringify(state,null,2));
-        Object.assign(run,metadata,{spaceConfirmed:true});run.context=context; run.buildId=build.id; await save(); return json(run);
+        Object.assign(run,metadata,{spaceConfirmed:true});run.context=context; run.buildId=build.id; return run;
+        }));
       }
       if(url.pathname === '/api/compare') {
         demand(b.baseline!==b.candidate,'Choose two different versions.');
@@ -145,8 +161,10 @@ const server = http.createServer(async (req,res)=>{
     const assets={'/':'index.html','/app.js':'app.js','/patrols.js':'patrols.js','/style.css':'style.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
-    if(url.pathname==='/') content=content.replace('__TOKEN__',token).replaceAll('__VERSION__',version);
+    if(url.pathname==='/') content=content.replaceAll('__VERSION__',version);
     res.writeHead(200,{'Content-Type':url.pathname.endsWith('.js')?'text/javascript':url.pathname.endsWith('.css')?'text/css':'text/html','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"});res.end(content);
   } catch(e) { json({error:e.message},400); }
 });
-server.listen(Number(process.env.PORT || 4317),'127.0.0.1',()=>{const url=`http://127.0.0.1:${server.address().port}`;console.log(`STO Shakedown: ${url}`);if(process.argv.includes('--open') && process.platform==='win32') execFile('cmd.exe',['/c','start','',url],{windowsHide:true});});
+server.listen(Number(process.env.PORT || 4317),'127.0.0.1',()=>{const url=`http://127.0.0.1:${server.address().port}`;const launchUrl=url+'/#session='+bootstrap;console.log(`STO Shakedown private launch (valid 5 minutes): ${launchUrl}`);if(process.argv.includes('--open') && process.platform==='win32') execFile('cmd.exe',['/c','start','',launchUrl],{windowsHide:true});});
+
+server.on('error',error=>{console.error(error.code==='EADDRINUSE'?'Shakedown is already running. Use its authenticated browser tab, or close its launcher before restarting.':error.message);process.exitCode=1;});

@@ -3,9 +3,9 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = value => new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(value||0);
 const compact = value => new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(value||0);
-let state, analysis, activeShip="";
+let state, analysis, activeShip="", sessionToken=sessionStorage.getItem("sto-session")||"";
 function notice(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
-async function api(route,body){const r=await fetch('/api/'+route,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-STO-Token':document.querySelector('meta[name="sto-token"]').content},body:body===undefined?undefined:JSON.stringify(body)});const value=await r.json();if(!r.ok)throw new Error(value.error||'Request failed');return value;}
+async function api(route,body){const r=await fetch('/api/'+route,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-STO-Token':sessionToken},body:body===undefined?undefined:JSON.stringify(body)});const value=await r.json();if(!r.ok)throw new Error(value.error||'Request failed');return value;}
 function page(id){window.scrollTo(0,0);document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));}
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));
 function action(id,fn){$(id).onclick=async()=>{const b=$(id);b.disabled=true;notice('');try{await fn();}catch(e){notice(e.message,true);}finally{b.disabled=false;}};}
@@ -60,7 +60,13 @@ function renderPlayer(){const {encounter:e,player:p}=selection();$('results').hi
 action('create-build',async()=>{const build=await api('build',{ship:$('ship').value,loadout:$('loadout').value,name:$('build-name').value,notes:$('build-notes').value});await refresh();chooseShip(state.loadouts.find(l=>l.id===build.loadoutId).profileId);$('save-build').value=build.id;$('build-name').value='';$('build-notes').value='';notice(`Created ${build.ship} / ${build.name}. Return to Analyze a run to attach evidence.`);});
 action('save-run',async()=>{const {encounter,player}=selection();if(!player)throw new Error('Select a player first.');await api('run',{encounterId:encounter.id,playerId:player.id,buildId:$('save-build').value,...patrolValue('save'),spaceConfirmed:$('space-confirmed').checked});await refresh();notice('Run saved to the selected variation.');});
 action('compare-button',async()=>{if(!$('compare-player').value)throw new Error('Select a player and encounter / difficulty.');const r=await api('compare',{baseline:$('baseline').value,candidate:$('candidate').value,playerId:$('compare-player').value,...patrolValue('compare')});const a=r.baseline,b=r.candidate;const delta=r.delta===null?'More evidence needed':`${r.delta>=0?'+':''}${r.delta.toFixed(1)}% observed DPS`;const row=(label,x,y)=>`<tr><td>${label}</td><td>${!a.count?"No matching runs":x===null?"Not recorded":num(x)}</td><td>${!b.count?"No matching runs":y===null?"Not recorded":num(y)}</td></tr>`;$('comparison').innerHTML=`<div class="eyebrow">OBSERVED COMPARISON · NO CAUSAL VERDICT</div><div class="verdict">${delta}</div><p>${esc(r.message)}</p><div class="table-wrap"><table><thead><tr><th>Metric</th><th>Baseline (${a.count} runs)</th><th>Candidate (${b.count} runs)</th></tr></thead><tbody>${row('Mean encounter DPS',a.mean,b.mean)}${row('Lowest run DPS',a.min,b.min)}${row('Highest run DPS',a.max,b.max)}${row('Run-to-run standard deviation',a.sd,b.sd)}${row('Ship / player DPS',a.direct,b.direct)}${row('Pets & summons DPS',a.pets,b.pets)}${row('Damage taken per second',a.incoming,b.incoming)}${row('Incoming hull damage / second',a.hullTaken,b.hullTaken)}${row('Incoming shield damage / second',a.shieldTaken,b.shieldTaken)}${row('Hull healing received / second',a.hullHealing,b.hullHealing)}${row('Shield healing received / second',a.shieldHealing,b.shieldHealing)}</tbody></table></div><p class="muted">Each run has equal weight. Match difficulty, team conditions, and piloting as closely as possible. Logged healing can include overhealing and is not a survival rating. “Not recorded” means one or more saved runs predate v0.2.0; it does not mean zero healing.</p>`;$('comparison').insertAdjacentHTML('beforeend',contributionTables(r));});
-refresh().catch(e=>notice(e.message,true));
+async function startSession(){
+ const secret=new URLSearchParams(location.hash.slice(1)).get('session');
+ if(secret){history.replaceState(null,'',location.pathname);const response=await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({secret})});const result=await response.json();if(!response.ok)throw Error(result.error);sessionToken=result.token;sessionStorage.setItem('sto-session',sessionToken);}
+ if(!sessionToken)throw Error('Open Shakedown using Start.cmd. This page has no private session.');
+ await refresh();
+}
+startSession().catch(e=>notice(e.message,true));
 
 function renderSurvival(player, encounter) {
   const s = player.survival;

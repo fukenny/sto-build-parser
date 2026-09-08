@@ -1,3 +1,5 @@
+**Development branch:** security hardening is implemented here but not yet released. Start through the launcher; a plain localhost URL no longer grants access. See [implementation and validation](docs/SECURITY-HARDENING.md).
+
 # STO Shakedown
 
 Test your Star Trek Online ship builds using space-patrol combat logs.

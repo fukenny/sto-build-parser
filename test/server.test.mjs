@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
-import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {once} from 'node:events';
@@ -11,7 +11,14 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
  const proc=spawn(process.execPath,['server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,PORT:'0',STO_DATA_DIR:path.join(temp,'data')},stdio:['ignore','pipe','pipe']});
  try {
   let buffer='';const base=await new Promise((resolve,reject)=>{proc.stdout.on('data',d=>{buffer+=d;const m=/http:\/\/127\.0\.0\.1:\d+/.exec(buffer);if(m)resolve(m[0]);});proc.on('error',reject);proc.on('exit',code=>reject(new Error(`Server exited ${code}`)));});
-  const html=await (await fetch(base)).text(); const token=/name="sto-token" content="([^"]+)"/.exec(html)[1];
+  const html=await (await fetch(base)).text();assert.ok(!html.includes('sto-token'));
+  const secret=/#session=([a-f0-9]{64})/.exec(buffer)[1];
+  assert.ok(!html.includes(secret));
+  assert.equal((await fetch(base+'/api/session',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({secret:'wrong'})})).status,400);
+  assert.equal((await fetch(base+'/api/session',{method:'POST',headers:{Origin:'https://example.com','Content-Type':'application/json'},body:JSON.stringify({secret})})).status,400);
+  const session=await fetch(base+'/api/session',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({secret})});
+  const {token}=await session.json();assert.ok(token);
+  assert.equal((await fetch(base+'/api/session',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({secret})})).status,400);
   const headers={'X-STO-Token':token,'Content-Type':'application/json'};
   const post=async(route,b)=>{const response=await fetch(base+'/api/'+route,{method:'POST',headers,body:JSON.stringify(b)});return {status:response.status,value:await response.json()};};
   assert.equal((await fetch(base+'/api/state')).status,400);
@@ -21,6 +28,9 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
   await writeFile(path.join(temp,'combatlog_test.log'),log+'26:09:07:08:02:10.0::Captain,P[1@2 Captain@account],,*,Enemy,C[2 Enemy],Beam,Pn.1,Phaser,,300,330\n');
   assert.equal((await post('folder',{folder:temp})).status,200);
   assert.equal((await post('analyze',{name:'../secret.log'})).status,400);
+  await writeFile(path.join(temp,'combatlog_hostile.log'),'x'.repeat(20000));
+  assert.equal((await post('analyze',{name:'combatlog_hostile.log'})).status,400);
+  assert.equal((await fetch(base+'/api/state',{headers})).status,200);
   const analyzed=(await post('analyze',{name:'combatlog_test.log'})).value;
   assert.equal(analyzed.encounters[0].players[0].dps,30);
   assert.equal(analyzed.encounters.length,2);
@@ -30,6 +40,12 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
   assert.deepEqual(analyzed.fullLog.encounterIds,analyzed.encounters.map(e=>e.id));
   const a=(await post('build',{name:'Baseline',ship:'Test ship'})).value;
   const b=(await post('build',{name:'Candidate',ship:'Test ship'})).value;
+  const obstruction=path.join(temp,'data','state.json.tmp');await mkdir(obstruction);
+  assert.equal((await post('build',{name:'Must not survive',ship:'Test ship'})).status,400);
+  await rm(obstruction,{recursive:true});
+  assert.equal((await (await fetch(base+'/api/state',{headers})).json()).builds.length,2);
+  assert.equal((await post('folder',{folder:temp})).status,200);
+  await post('analyze',{name:'combatlog_test.log'});
   const input={buildId:a.id,encounterId:analyzed.encounters[0].id,playerId:'P[1@2 Captain@account]',patrolId:'strike-at-seedea',difficulty:'Advanced',party:'Solo',spaceConfirmed:true};
   assert.equal((await post('run',{...input,spaceConfirmed:false})).status,400);
   assert.equal((await post('run',{...input,patrolId:'ground'})).status,400);

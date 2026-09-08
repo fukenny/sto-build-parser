@@ -1,3 +1,10 @@
+# Unreleased — security hardening
+
+- Private one-time launcher session; remove token from public HTML.
+- Isolated parser with input, memory and time limits.
+- Transactional persistence with recovery after write errors.
+- Add security regression tests and document remaining validation.
+
 # v0.5.0 — Ship workspaces and space patrol comparisons
 
 - Isolate ships and group variations by loadout.

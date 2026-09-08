@@ -1,3 +1,7 @@
+SECURITY DEVELOPMENT BRANCH: Start using Start.cmd. Use the authenticated browser tab.
+If it is lost, close the launcher and restart. The console prints a private startup
+URL for manual fallback; do not share it. See docs/SECURITY-HARDENING.md.
+
 NEW IN 0.5: Choose your ship workspace. Patrol category, mission, difficulty,
 and Solo/Group replace free-text labels. Confirm space-only completed combat.
 Older runs: Edit label / version to confirm patrol settings before comparing.
