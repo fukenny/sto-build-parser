@@ -2,6 +2,8 @@
 
 Test your Star Trek Online ship builds using space-patrol combat logs.
 
+[Security review and planned fixes](docs/SECURITY-REVIEW-2026-09-08.md) — findings remain open in v0.5.0.
+
 ## Download for Windows
 
 ### [Download STO Shakedown v0.5.0 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.0/sto-shakedown-v0.5.0-windows-x64.zip)
