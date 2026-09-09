@@ -1,6 +1,6 @@
 # Security hardening branch
 
-Implemented on `security/harden-local-runtime`; not yet merged or released. The public v0.5.0 ZIP still has the findings in the [original review](SECURITY-REVIEW-2026-09-08.md).
+Included in v0.5.1. The superseded v0.5.0 ZIP has the findings in the [original review](SECURITY-REVIEW-2026-09-08.md).
 
 ## Private launch session
 

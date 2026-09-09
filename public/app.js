@@ -5,6 +5,34 @@ const num = value => new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).fo
 const compact = value => new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(value||0);
 let state, analysis, activeShip="", sessionToken=sessionStorage.getItem("sto-session")||"";
 function notice(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
+let exiting=false, lifetimeController;
+async function keepServerConnected(){
+ while(!exiting){
+  try{
+   lifetimeController=new AbortController();
+   const response=await fetch('/api/lifetime',{headers:{'X-STO-Token':sessionToken},signal:lifetimeController.signal});
+   if(!response.ok)break;
+   const reader=response.body.getReader();
+   while(!(await reader.read()).done){}
+  }catch{}
+  if(!exiting)await new Promise(resolve=>setTimeout(resolve,1000));
+ }
+}
+window.addEventListener('pagehide',()=>{exiting=true;lifetimeController?.abort();});
+window.addEventListener('pageshow',event=>{if(event.persisted){exiting=false;void keepServerConnected();}});
+const exitButton=document.createElement('button');
+exitButton.textContent='Exit Shakedown';exitButton.id='exit-shakedown';
+document.querySelector('.aside-bottom').prepend(exitButton);
+exitButton.onclick=async()=>{
+ exitButton.disabled=true;
+ try{
+  await api('shutdown',{});exiting=true;lifetimeController?.abort();sessionStorage.removeItem('sto-session');
+  document.querySelector('main').replaceChildren();
+  const message=document.createElement('h1');message.textContent='Shakedown has stopped. You can close this tab.';
+  document.querySelector('main').append(message);
+  document.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=true);
+ }catch(e){notice(e.message,true);exitButton.disabled=false;}
+};
 async function api(route,body){const r=await fetch('/api/'+route,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json','X-STO-Token':sessionToken},body:body===undefined?undefined:JSON.stringify(body)});const value=await r.json();if(!r.ok)throw new Error(value.error||'Request failed');return value;}
 function page(id){window.scrollTo(0,0);document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));}
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));
@@ -64,6 +92,7 @@ async function startSession(){
  const secret=new URLSearchParams(location.hash.slice(1)).get('session');
  if(secret){history.replaceState(null,'',location.pathname);const response=await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({secret})});const result=await response.json();if(!response.ok)throw Error(result.error);sessionToken=result.token;sessionStorage.setItem('sto-session',sessionToken);}
  if(!sessionToken)throw Error('Open Shakedown using Start.cmd. This page has no private session.');
+ void keepServerConnected();
  await refresh();
 }
 startSession().catch(e=>notice(e.message,true));

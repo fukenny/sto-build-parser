@@ -1,5 +1,7 @@
-# Unreleased — security hardening
+# v0.5.1 — Shutdown fix and security hardening
 
+- Add Exit Shakedown and automatic shutdown 15 seconds after the last browser disconnects; finish queued saves and stop parser workers.
+- Stop unused launches after five minutes; preserve refresh and multiple-tab sessions.
 - Private one-time launcher session; remove token from public HTML.
 - Isolated parser with input, memory and time limits.
 - Transactional persistence with recovery after write errors.

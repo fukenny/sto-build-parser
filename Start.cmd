@@ -29,6 +29,7 @@ if not exist "%~dp0server.mjs" (
   exit /b 1
 )
 echo STO Shakedown opens a private browser session.
-echo Keep this window open. Press Ctrl+C to stop.
+echo Use Exit Shakedown to stop immediately, or close its browser tabs.
+echo Closing the last tab stops the server after 15 seconds. Ctrl+C also stops it.
 "%stoNode%" server.mjs --open
-pause
+if errorlevel 1 pause

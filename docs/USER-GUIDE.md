@@ -16,7 +16,7 @@ Created by Kenneth Solans
 1. Extract the complete Windows x64 portable ZIP into a writable folder.
    Double-click Start.cmd. It includes Node and opens your existing browser.
    No Node, npm, Codex, or other software installation is needed.
-   Keep the launcher window open. Close it to stop the app.
+   Use Exit Shakedown to stop immediately. Closing all Shakedown tabs stops the server after 15 seconds; keep the launcher open while using the app.
 2. Before flying, type /combatlog 1 in STO chat.
 3. Choose Log folder in Shakedown and select your own GameClient folder.
 4. Open Ship profiles. Enter your ship, a loadout (Beam Broadside), and a

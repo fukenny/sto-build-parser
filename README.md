@@ -1,21 +1,21 @@
-**Development branch:** security hardening is implemented here but not yet released. Start through the launcher; a plain localhost URL no longer grants access. See [implementation and validation](docs/SECURITY-HARDENING.md).
-
 # STO Shakedown
 
 Test your Star Trek Online ship builds using space-patrol combat logs.
 
-[Security review and planned fixes](docs/SECURITY-REVIEW-2026-09-08.md) — findings remain open in v0.5.0.
+[Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
 ## Download for Windows
 
-### [Download STO Shakedown v0.5.0 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.0/sto-shakedown-v0.5.0-windows-x64.zip)
+### [Download STO Shakedown v0.5.1 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.1/sto-shakedown-v0.5.1-windows-x64.zip)
 
 **Free fan-project preview · Windows x64 · No Node, npm, or Codex installation needed.**
 
 1. Download the ZIP using the link above.
 2. Right-click it and choose **Extract All**. Choose a writable folder, such as Documents.
 3. Open the extracted folder and double-click **Start.cmd**. With file extensions hidden, this appears as **Start** (Windows Command Script).
-4. Your normal browser opens STO Shakedown. Keep the launcher window open while using it. If the browser does not open, visit **http://127.0.0.1:4317**.
+4. Your normal browser opens STO Shakedown. Keep the launcher window open while using it. If the browser does not open, copy the private launch URL printed in the launcher. Do not share that URL.
+
+**Stopping:** click **Exit Shakedown** to stop the server and parser workers. Closing all Shakedown tabs stops it after a 15-second refresh grace period. A launch that never connects stops after five minutes. Suspended/discarded browser tabs may disconnect too; restart Start.cmd if needed. Only explicitly saved runs are retained.
 
 The ZIP includes the runtime and instructions. GitHub's **Code → Download ZIP** and **Source code** downloads are for developers and do not include the runtime.
 

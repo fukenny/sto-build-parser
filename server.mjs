@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {parseIsolated} from './lib/isolated-parser.mjs';
+import {parseIsolated,stopParsers} from './lib/isolated-parser.mjs';
 import {createStore} from './lib/store.mjs';
 import {compareRuns} from './lib/comparison.mjs';
 import {conditions,conditionKey,patrols} from './public/patrols.js';
@@ -36,6 +36,24 @@ let bootstrap=randomBytes(32).toString('hex');
 const bootstrapDeadline=Date.now()+300000;
 let token=null;
 let analysis = null, parsing = false, picking = false;
+let stopping=false, pickerChild;
+const browserConnections=new Set();
+const closeGrace=Number(process.env.STO_CLOSE_GRACE_MS || 15000);
+let closeTimer=setTimeout(()=>shutdown(),Number(process.env.STO_STARTUP_TIMEOUT_MS || 300000));
+async function shutdown() {
+  if(stopping)return;
+  stopping=true;clearTimeout(closeTimer);
+  console.log('Stopping STO Shakedown and finishing saved writes…');
+  for(const res of browserConnections)res.end();
+  pickerChild?.kill();
+  server.close();
+  await stopParsers();
+  await store.drain();
+  server.closeAllConnections();
+  console.log('STO Shakedown stopped.');
+}
+process.on('SIGINT',shutdown);
+process.on('SIGTERM',shutdown);
 function demand(condition, message) { if(!condition) throw new Error(message); }
 const text = (value, name, max=300) => { demand(typeof value === 'string' && value.trim() && value.length <= max, `Enter ${name} (up to ${max} characters).`); return value.trim(); };
 async function logs(folder=store.state.folder) {
@@ -48,6 +66,7 @@ const server = http.createServer(async (req,res)=>{
   const state=store.state;
   const json = (obj,code=200)=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'}); res.end(JSON.stringify(obj));};
   try {
+    if(stopping)return json({error:'Shakedown is shutting down.'},503);
     const host = `127.0.0.1:${server.address().port}`;
     demand(req.headers.host === host, 'Invalid local host.');
     const url = new URL(req.url, `http://${host}`);
@@ -60,12 +79,27 @@ const server = http.createServer(async (req,res)=>{
     if(url.pathname.startsWith('/api/')) {
       demand(token && req.headers['x-sto-token'] === token, 'Open the app locally to access logs.');
       if(req.headers.origin) demand(req.headers.origin === `http://${host}`, 'Cross-origin access is not allowed.');
+      if(req.method==='GET' && url.pathname==='/api/lifetime') {
+        clearTimeout(closeTimer);
+        res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store'});
+        res.write(': connected\n\n');browserConnections.add(res);
+        const pulse=setInterval(()=>res.write(': alive\n\n'),10000);
+        res.on('close',()=>{
+          clearInterval(pulse);browserConnections.delete(res);
+          if(!stopping && !browserConnections.size)closeTimer=setTimeout(shutdown,closeGrace);
+        });
+        return;
+      }
       if(req.method === 'GET' && url.pathname === '/api/state') {
         try { return json({...state,logs:await logs()}); }
         catch { return json({...state,logs:[],folderError:'The saved log folder is unavailable. Choose a folder in Log folder settings.'}); }
       }
       demand(req.method === 'POST', 'Unsupported request.');
       const b = await body(req);
+      demand(!stopping,'Shakedown is shutting down.');
+      if(url.pathname==='/api/shutdown') {
+        json({stopped:true});void shutdown();return;
+      }
       if(url.pathname === '/api/folder') {
         const folder = await realpath(text(b.folder,'a folder path',2048));
         demand((await stat(folder)).isDirectory(),'Select a folder.');
@@ -78,9 +112,11 @@ const server = http.createServer(async (req,res)=>{
         demand(!picking,'A folder picker is already open.'); picking=true;
         try {
           const script = "Add-Type -AssemblyName System.Windows.Forms; $picker = New-Object System.Windows.Forms.FolderBrowserDialog; $picker.Description = 'Select the STO GameClient combat log folder'; $picker.ShowNewFolderButton = $false; if ($picker.ShowDialog() -eq 'OK') { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write($picker.SelectedPath) }; $picker.Dispose()";
-          const result=await promisify(execFile)('powershell.exe',['-NoProfile','-STA','-Command',script],{windowsHide:true,timeout:120000});
+          const pending=promisify(execFile)('powershell.exe',['-NoProfile','-STA','-Command',script],{windowsHide:true,timeout:120000});
+          pickerChild=pending.child;
+          const result=await pending;
           return json({folder:result.stdout.trim()});
-        } finally {picking=false;}
+        } finally {picking=false;pickerChild=null;}
       }
       if(url.pathname === '/api/analyze') {
         demand(!parsing,'Another log is being read. Please wait.');
@@ -90,6 +126,7 @@ const server = http.createServer(async (req,res)=>{
         demand(Array.isArray(names) && names.length>0 && names.length<=12 && new Set(names).size===names.length && names.every(name=>typeof name==='string' && listed.some(l=>l.name===name)),'Choose 1–12 listed combat logs.');
           const folder=store.state.folder;
           const files=await Promise.all(names.map(name=>realpath(path.join(folder,name))));
+          demand(!stopping,'Shakedown is shutting down.');
           demand(files.every(file=>path.dirname(file).toLowerCase()===folder.toLowerCase()),'Log must be in the selected folder.');
           const result=await parseIsolated(files);
           demand(store.state.folder===folder,'Folder changed during import. Import again.');
@@ -167,4 +204,4 @@ const server = http.createServer(async (req,res)=>{
 });
 server.listen(Number(process.env.PORT || 4317),'127.0.0.1',()=>{const url=`http://127.0.0.1:${server.address().port}`;const launchUrl=url+'/#session='+bootstrap;console.log(`STO Shakedown private launch (valid 5 minutes): ${launchUrl}`);if(process.argv.includes('--open') && process.platform==='win32') execFile('cmd.exe',['/c','start','',launchUrl],{windowsHide:true});});
 
-server.on('error',error=>{console.error(error.code==='EADDRINUSE'?'Shakedown is already running. Use its authenticated browser tab, or close its launcher before restarting.':error.message);process.exitCode=1;});
+server.on('error',error=>{clearTimeout(closeTimer);console.error(error.code==='EADDRINUSE'?'Shakedown is already running. Use its authenticated browser tab, or close its launcher before restarting.':error.message);process.exitCode=1;});
