@@ -3,3 +3,8 @@
 /* The elbow's solid base aligns with the full sidebar; its cutout curves over the content. */
 @media(min-width:851px){.elbow{width:308px}.elbow:after{width:100px}}
 @media(min-width:581px) and (max-width:850px){.elbow{width:220px}.elbow:after{width:70px}}
+
+/* Align the top bar with the main content's left edge, above SHIPYARD. */
+@media(min-width:851px){.segments{margin-left:-76px}}
+@media(min-width:581px) and (max-width:850px){.segments{margin-left:-58px}}
+.analysis-links{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.analysis-links a{display:inline-block;color:#000;background:var(--violet);border-radius:24px;padding:10px 18px;text-decoration:none;font-size:13px;font-weight:700}.analysis-links a:focus-visible{outline:3px solid white;outline-offset:3px}.damage-table{font-size:13px}.damage-table caption{text-align:left;color:var(--mauve);font-size:12px;padding:8px 0}.damage-table tfoot td{border-top:5px solid var(--peach);font-weight:700;color:var(--peach)}#analyze .comparison{gap:32px}#analyze .comparison article{min-width:0}#preview-damage,#preview-survival,#preview-save{scroll-margin-top:20px}
