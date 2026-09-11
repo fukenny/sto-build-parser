@@ -4,6 +4,18 @@ Test your Star Trek Online ship builds using space-patrol combat logs.
 
 [Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
+## v0.5.3 review build
+
+The new LCARS layout and Shipyard workflow are merged into main for testing. The v0.5.3 Windows package is being prepared for review; the public download below remains v0.5.1 until that review is complete.
+
+- Create a ship, then its loadouts and equipment variations.
+- Open **Setup & runs** to expand run history and compare two unchanged flights.
+- Use **Compare variations in this loadout** to compare equipment changes across matching runs.
+- Copy equipment notes into a new variation, or archive/restore a variation without losing runs.
+- **Analyze a new run with [variation]** selects the setup before importing fresh evidence.
+
+See the [updated user guide](docs/USER-GUIDE.md) for the full workflow.
+
 ## Download for Windows
 
 ### [Download STO Shakedown v0.5.1 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.1/sto-shakedown-v0.5.1-windows-x64.zip)
@@ -25,7 +37,7 @@ The ZIP includes the runtime and instructions. GitHub's **Code → Download ZIP*
 
 1. In STO chat, enter **/combatlog 1** before playing a patrol.
 2. In Shakedown, choose **Log folder** and select the GameClient folder containing your combat logs. Use your installation's location; it is not assumed.
-3. In **Ship profiles**, create your ship, a loadout, and a **Baseline** variation with equipment notes. You can do this before or after flying.
+3. In **Shipyard**, add a ship and open its profile. Add a loadout and its **Baseline** variation with equipment notes. You can do this before or after flying.
 4. In **Analyze a run**, select a completed log. Ctrl-select adjacent logs if the fight was split between files. Select the combat stretch and **your character**.
 5. Review damage and survivability. Select the variation actually equipped, patrol category, mission, difficulty, and Solo/Group. Confirm this is a complete space patrol and save.
 6. Save more unchanged runs to the same variation. After changing equipment, create a new variation and collect comparable runs.
