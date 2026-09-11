@@ -195,7 +195,11 @@ const server = http.createServer(async (req,res)=>{
       res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8','Content-Disposition':'attachment; filename="START-HERE.txt"','X-Content-Type-Options':'nosniff'});
       return res.end(await readFile(path.join(root,'START-HERE.txt')));
     }
-    const assets={'/':'index.html','/app.js':'app.js','/patrols.js':'patrols.js','/style.css':'style.css'};
+    if(url.pathname==='/fonts/Antonio.ttf') {
+      res.writeHead(200,{'Content-Type':'font/ttf','Cache-Control':'public, max-age=86400'});
+      return res.end(await readFile(path.join(root,'public/fonts/Antonio.ttf')));
+    }
+    const assets={'/':'index.html','/app.js':'app.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
     if(url.pathname==='/') content=content.replaceAll('__VERSION__',version);
