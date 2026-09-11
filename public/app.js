@@ -22,6 +22,8 @@ window.addEventListener('pagehide',()=>{exiting=true;lifetimeController?.abort()
 window.addEventListener('pageshow',event=>{if(event.persisted){exiting=false;void keepServerConnected();}});
 const exitButton=document.createElement('button');
 exitButton.textContent='Exit Shakedown';exitButton.id='exit-shakedown';
+exitButton.className='nav exit-nav';
+exitButton.innerHTML='<span aria-hidden="true">⏻</span><span>Exit Shakedown</span>';
 document.querySelector('.aside-bottom').prepend(exitButton);
 exitButton.onclick=async()=>{
  exitButton.disabled=true;

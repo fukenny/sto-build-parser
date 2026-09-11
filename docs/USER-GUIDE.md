@@ -66,3 +66,8 @@ Independent fan project, not affiliated with or endorsed by Cryptic Studios
 or the owners of Star Trek. Related marks belong to their owners.
 Please preserve Kenneth Solans' creator credit; do not claim this as your own.
 More: docs/USER-GUIDE.md, docs/METRICS.md, CHANGELOG.md.
+
+
+## Ship profile names are reference labels
+
+Follow Log folder → Ship profiles → Analyze a run → Compare builds. Type a recognizable ship profile name, then create its loadout and variation. This profile is not linked to a ship in STO and does not detect the ship you flew or filter the log list. Select logs recorded while flying that ship and equipment setup, choose the correct combat stretch and character, then save it to the matching variation. If a file contains runs from different ships, select only the appropriate combat stretch.
