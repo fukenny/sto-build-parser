@@ -9,3 +9,5 @@ Open index.html directly in a browser. No backend, imports, API calls, or persis
 - Ship selector is left-aligned alongside the right-aligned Your Shipyard title.
 
 This is a workflow discussion artifact, not the v0.5.2 release or a parser implementation.
+
+Elite Valkyrie test now has one matching Seedea / Elite / Solo sample run. Open Beam Broadside and use the Compare variations section above the setup cards. XV is the default baseline and Elite Valkyrie test is the default candidate; the result compares two baseline runs against one candidate run. Same-variation selections and missing matching evidence are blocked.
