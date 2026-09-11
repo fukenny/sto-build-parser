@@ -1,3 +1,11 @@
+# v0.5.2 — LCARS interface update (design branch)
+
+- Compact title with opposing LCARS frames and locally bundled Antonio font.
+- Fixed desktop frame with independent content scrolling.
+- Bottom-aligned Exit and credits, colored sidebar spacer, and varied navigation colors.
+- Ship profiles precede analysis, with clear reference-only naming guidance.
+- Published download remains v0.5.1 until a v0.5.2 release is packaged and published.
+
 # v0.5.1 — Shutdown fix and security hardening
 
 - Add Exit Shakedown and automatic shutdown 15 seconds after the last browser disconnects; finish queued saves and stop parser workers.
