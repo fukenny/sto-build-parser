@@ -1,3 +1,16 @@
+## v0.5.2 design branch: ships, setups and repeated flights
+
+1. In **Shipyard**, add a reference ship name and open its profile. It does not link to STO; select logs from the correct ship yourself.
+2. Add a loadout, then variations for different equipment setups. Keep using the same variation while equipment is unchanged.
+3. Open **Setup & runs**. **Analyze a new run with [variation]** selects that variation and asks you to import fresh combat evidence. You can create the setup before or after flying.
+4. Import the log, select the new combat and your character, confirm patrol/difficulty/party, and save. Saving opens that variation's run history.
+5. Expand **Run history**, select two matching flights, and choose **Compare selected runs** to check consistency. For equipment changes, use **Compare variations in this loadout**; all matching runs contribute equally.
+6. **Create variation from this setup** copies notes for you to revise and starts with zero runs. **Archive variation** retains evidence; use **Show archived variations** in the profile to find and restore it.
+
+A log can contain earlier flights. If saving reports overlapping evidence, reimport the updated file and select only the new encounter. Do not select Entire log when it includes previously saved combat. Rotated files from one flight can still be imported together.
+
+These are real local saves, with no demonstration ships or fabricated runs added. Back up your data folder before testing this unreleased branch.
+
 ## v0.5.0: space patrol testing
 
 Choose **Current ship workspace** to isolate a ship. Ship profiles groups its variations under loadouts; Compare limits choices to one loadout.

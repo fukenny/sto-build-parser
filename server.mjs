@@ -133,6 +133,34 @@ const server = http.createServer(async (req,res)=>{
           analysis={...result,file:names.join(' + '),files:names}; return json(analysis);
         } finally {parsing=false;}
       }
+      if(url.pathname === '/api/variation/archive' || url.pathname === '/api/variation/copy') {
+        return json(await store.transact(state=>{
+          const build=state.builds.find(v=>v.id===b.id);demand(build,'Choose a saved variation.');
+          if(url.pathname.endsWith('/archive')) {
+            demand(typeof b.archived==='boolean','Choose archive or restore.');
+            build.archived=b.archived;return build;
+          }
+          demand(!build.archived,'Restore this variation before copying it.');
+          const name=text(b.name,'a variation name');
+          demand(!state.builds.some(v=>v.loadoutId===build.loadoutId && v.name.toLowerCase()===name.toLowerCase()),'That variation name already exists in this loadout.');
+          demand(b.notes===undefined || (typeof b.notes==='string' && b.notes.length<=10000),'Notes must be text up to 10000 characters.');
+          const copy={...structuredClone(build),notes:b.notes??build.notes,id:randomUUID(),name,archived:false,createdAt:new Date().toISOString()};
+          state.builds.push(copy);return copy;
+        }));
+      }
+      if(url.pathname === '/api/runs/compare') {
+        demand(Array.isArray(b.ids) && b.ids.length===2 && new Set(b.ids).size===2,'Select two different saved runs.');
+        const runs=b.ids.map(id=>state.runs.find(r=>r.id===id));demand(runs.every(Boolean),'A selected run no longer exists.');
+        const [a,c]=runs;
+        demand(a.buildId===c.buildId,'Select runs from the same variation. Use Compare builds for different setups.');
+        demand(a.player.id===c.player.id,'Choose runs for the same character.');
+        demand(a.spaceConfirmed && c.spaceConfirmed && conditionKey(a)===conditionKey(c),'Choose confirmed runs with matching patrol, difficulty, and Solo / Group.');
+        demand((a.scope||'encounter')===(c.scope||'encounter'),'Choose runs using the same combat scope.');
+        demand(!(a.encounterIds||[a.encounterId]).some(id=>(c.encounterIds||[c.encounterId]).includes(id)),'These runs overlap the same combat evidence.');
+        const result=compareRuns([a],[c]);
+        result.message='Same equipment, two flights. This shows run-to-run consistency, not an equipment improvement.';
+        return json({...result,runs:runs.map(r=>({id:r.id,stamp:r.stamp,context:r.context}))});
+      }
       if(url.pathname === '/api/profile') {
         return json(await store.transact(state=>{
           const name=text(b.name,'a ship name');
@@ -175,10 +203,11 @@ const server = http.createServer(async (req,res)=>{
         const encounter=analysis?.fullLog?.id===b.encounterId ? analysis.fullLog : analysis?.encounters.find(e=>e.id===b.encounterId), player=encounter?.players.find(p=>p.id===b.playerId);
         demand(player && (player.total>0 || player.incoming>0 || player.survival?.receivedHull + player.survival?.receivedShield > 0),'Select an encounter and a player with recorded combat activity.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
+        demand(!build.archived,'Restore this variation before adding more runs.');
         const metadata=conditions(b),context=metadata.context;
         demand(b.spaceConfirmed===true,'Confirm this selection is one complete space patrol with unchanged equipment. Ground combat is unsupported.');
         const encounterIds=encounter.encounterIds || [encounter.id];
-        demand(!state.runs.some(r=>r.player.id===player.id && (r.encounterIds || [r.encounterId]).some(id=>encounterIds.includes(id))),'This selection overlaps evidence already saved for this player. The same combat cannot count as an independent run twice.');
+        demand(!state.runs.some(r=>r.player.id===player.id && (r.encounterIds || [r.encounterId]).some(id=>encounterIds.includes(id))),'This selection includes combat already saved for this player. Reimport the updated log after flying again, then select only the new encounter. Entire log may include your earlier run.');
         const run={id:randomUUID(),buildId:build.id,encounterId:encounter.id,context,player,stamp:encounter.stamp,duration:encounter.duration,file:analysis.file,parserVersion:analysis.parserVersion,savedAt:new Date().toISOString()};
         run.scope=encounter.scope || 'encounter'; run.encounterIds=encounterIds;
         Object.assign(run,metadata,{spaceConfirmed:true});

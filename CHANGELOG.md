@@ -1,5 +1,9 @@
 # v0.5.2 — LCARS interface update (design branch)
 
+- Ship → loadout → variation detail with collapsible run history and multiple flights per setup.
+- Compare two matching flights within a variation, or matching runs across variations.
+- Copy notes into new variations, archive/restore without deleting evidence, and select a setup before importing the next run.
+- Backend regression coverage for repeated flights, matching conditions, overlap rejection and persistence.
 - Compact title with opposing LCARS frames and locally bundled Antonio font.
 - Fixed desktop frame with independent content scrolling.
 - Bottom-aligned Exit and credits, colored sidebar spacer, and varied navigation colors.
