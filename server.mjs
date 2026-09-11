@@ -133,6 +133,30 @@ const server = http.createServer(async (req,res)=>{
           analysis={...result,file:names.join(' + '),files:names}; return json(analysis);
         } finally {parsing=false;}
       }
+      if(url.pathname === '/api/profile') {
+        return json(await store.transact(state=>{
+          const name=text(b.name,'a ship name');
+          demand(!state.profiles.some(p=>p.name.toLowerCase()===name.toLowerCase()),'That ship already exists. Open its profile in Shipyard.');
+          const profile={id:randomUUID(),name};state.profiles.push(profile);return profile;
+        }));
+      }
+      if(url.pathname === '/api/loadout' || url.pathname === '/api/variation') {
+        return json(await store.transact(state=>{
+          const profile=state.profiles.find(p=>p.id===b.profileId);demand(profile,'Choose a ship in Shipyard first.');
+          let loadout, name;
+          if(url.pathname === '/api/loadout') {
+            name=text(b.name,'a loadout name');
+            demand(!state.loadouts.some(l=>l.profileId===profile.id && l.name.toLowerCase()===name.toLowerCase()),'That loadout already exists. Add a variation to it instead.');
+            loadout={id:randomUUID(),profileId:profile.id,name};state.loadouts.push(loadout);name='Baseline';
+          } else {
+            loadout=state.loadouts.find(l=>l.id===b.loadoutId && l.profileId===profile.id);demand(loadout,'Choose a loadout belonging to this ship.');
+            name=text(b.name,'a variation name');
+            demand(!state.builds.some(v=>v.loadoutId===loadout.id && v.name.toLowerCase()===name.toLowerCase()),'That variation already exists. Save more runs to it, or choose a different name.');
+          }
+          const build={id:randomUUID(),loadoutId:loadout.id,ship:profile.name,name,notes:typeof b.notes==='string'?b.notes.slice(0,10000):'',createdAt:new Date().toISOString()};
+          state.builds.push(build);return build;
+        }));
+      }
       if(url.pathname === '/api/build') {
         return json(await store.transact(async state=>{
         let profile=state.profiles.find(p=>p.name.toLowerCase()===text(b.ship,'a ship name').toLowerCase());

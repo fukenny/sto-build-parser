@@ -71,3 +71,11 @@ More: docs/USER-GUIDE.md, docs/METRICS.md, CHANGELOG.md.
 ## Ship profile names are reference labels
 
 Follow Log folder → Ship profiles → Analyze a run → Compare builds. Type a recognizable ship profile name, then create its loadout and variation. This profile is not linked to a ship in STO and does not detect the ship you flew or filter the log list. Select logs recorded while flying that ship and equipment setup, choose the correct combat stretch and character, then save it to the matching variation. If a file contains runs from different ships, select only the appropriate combat stretch.
+
+## v0.5.2 Shipyard workflow
+1. Open Shipyard and add a ship using only its reference name.
+2. Open its ship profile and add a named loadout. This creates its Baseline variation automatically.
+3. Record equipment in the Baseline notes, then save matching combat runs to it.
+4. Add a variation under the same loadout when equipment changes. Keep saving unchanged runs to the same variation.
+5. Saved runs are listed inside each variation card. Use All ships to return to Shipyard. The compact Current ship selector beside Your Shipyard changes the active workspace.
+Existing ship profiles, loadouts, variations, and saved runs are preserved.

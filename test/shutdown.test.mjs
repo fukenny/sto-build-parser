@@ -6,6 +6,19 @@ import {mkdtemp,rm,readFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+test('ship creation is independent and variations cannot cross ship ownership',{timeout:10000},async t=>{
+ const s=await launch(t);
+ const post=async(route,body)=>{const r=await fetch(s.base+'/api/'+route,{method:'POST',headers:s.headers,body:JSON.stringify(body)});return {status:r.status,body:await r.json()};};
+ const first=await post('profile',{name:'Franklen'}),second=await post('profile',{name:'Other ship'});
+ assert.equal(first.status,200);assert.equal((await post('profile',{name:' franklen '})).status,400);
+ let state=await(await fetch(s.base+'/api/state',{headers:s.headers})).json();assert.equal(state.loadouts.length,0);assert.equal(state.builds.length,0);
+ const baseline=await post('loadout',{profileId:first.body.id,name:'Beams'});assert.equal(baseline.body.name,'Baseline');
+ assert.equal((await post('loadout',{profileId:first.body.id,name:'beams'})).status,400);
+ assert.equal((await post('variation',{profileId:second.body.id,loadoutId:baseline.body.loadoutId,name:'Wrong ship'})).status,400);
+ assert.equal((await post('variation',{profileId:first.body.id,loadoutId:baseline.body.loadoutId,name:'Elite test'})).status,200);
+ state=await(await fetch(s.base+'/api/state',{headers:s.headers})).json();assert.equal(state.profiles.length,2);assert.equal(state.loadouts.length,1);assert.equal(state.builds.length,2);
+});
+
 async function launch(t){
  const dir=await mkdtemp(path.join(os.tmpdir(),'sto-shutdown-'));
  const proc=spawn(process.execPath,['server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,PORT:'0',STO_DATA_DIR:dir,STO_CLOSE_GRACE_MS:'500'},stdio:['ignore','pipe','pipe']});
