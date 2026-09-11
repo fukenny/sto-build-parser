@@ -1,0 +1,39 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {once} from 'node:events';
+import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
+import os from 'node:os';import path from 'node:path';
+test('real workflow saves repeated flights, compares, archives, restores and copies without moving runs',{timeout:15000},async()=>{
+ const dir=await mkdtemp(path.join(os.tmpdir(),'sto-workflow-'));let child;
+ try{
+ child=spawn(process.execPath,['server.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,PORT:'0',STO_DATA_DIR:path.join(dir,'data')},stdio:['ignore','pipe','pipe']});const exited=once(child,'exit');
+ const url=await new Promise(resolve=>{let out='';child.stdout.on('data',b=>{out+=b;const m=out.match(/http:\/\/127\.0\.0\.1:\d+\/#session=[a-f0-9]+/);if(m)resolve(new URL(m[0]));});});
+ const base=url.origin;const session=await(await fetch(base+'/api/session',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({secret:url.hash.slice(9)})})).json();
+ const headers={'X-STO-Token':session.token,'Content-Type':'application/json'};
+ const post=async(route,b)=>{const r=await fetch(base+'/api/'+route,{method:'POST',headers,body:JSON.stringify(b)});return {status:r.status,value:await r.json()};};
+ const ship=(await post('profile',{name:'Test ship'})).value;
+ const build=(await post('loadout',{profileId:ship.id,name:'Beams',notes:'Original equipment'})).value;
+ const line=(minute,second)=>`26:09:11:08:${minute}:${second}.0::Captain,P[1@2 Captain@account],,*,Enemy,C[2 Enemy],Beam,Pn.1,Phaser,,100,110\n`;
+ await writeFile(path.join(dir,'combatlog_test.log'),line('00','00')+line('00','10')+line('03','00')+line('03','10')+line('06','00')+line('06','10'));
+ await post('folder',{folder:dir});const analysis=(await post('analyze',{name:'combatlog_test.log'})).value;
+ const input={buildId:build.id,playerId:'P[1@2 Captain@account]',patrolId:'strike-at-seedea',difficulty:'Elite',party:'Solo',spaceConfirmed:true};
+ const a=(await post('run',{...input,encounterId:analysis.encounters[0].id})).value;
+ const b=(await post('run',{...input,encounterId:analysis.encounters[1].id})).value;
+ assert.ok(a.id&&b.id);assert.equal((await post('run',{...input,encounterId:analysis.fullLog.id})).status,400);
+ const result=await post('runs/compare',{ids:[a.id,b.id]});assert.equal(result.status,200);assert.equal(result.value.baseline.count,1);assert.equal(result.value.candidate.count,1);
+ assert.equal((await post('runs/compare',{ids:[a.id,a.id]})).status,400);
+ await post('run/edit',{id:b.id,...input,difficulty:'Normal'});assert.equal((await post('runs/compare',{ids:[a.id,b.id]})).status,400);
+ await post('run/edit',{id:b.id,...input});
+ assert.equal((await post('variation/archive',{id:build.id,archived:true})).status,200);
+ assert.equal((await post('run',{...input,encounterId:analysis.encounters[2].id})).status,400);
+ assert.equal((await post('variation/copy',{id:build.id,name:'Blocked copy'})).status,400);
+ await post('variation/archive',{id:build.id,archived:false});
+ const copy=(await post('variation/copy',{id:build.id,name:'Valkyrie'})).value;assert.equal(copy.notes,'Original equipment');assert.equal(copy.loadoutId,build.loadoutId);
+ const c=(await post('run',{...input,buildId:copy.id,encounterId:analysis.encounters[2].id})).value;
+ assert.equal((await post('runs/compare',{ids:[a.id,c.id]})).status,400);
+ const compare=await post('compare',{...input,baseline:build.id,candidate:copy.id});assert.equal(compare.status,200);assert.equal(compare.value.baseline.count,2);assert.equal(compare.value.candidate.count,1);
+ await post('variation/archive',{id:copy.id,archived:true});await post('shutdown',{});await exited;
+ const persisted=JSON.parse(await readFile(path.join(dir,'data/state.json'),'utf8'));assert.equal(persisted.runs.filter(r=>r.buildId===build.id).length,2);assert.equal(persisted.runs.filter(r=>r.buildId===copy.id).length,1);assert.equal(persisted.builds.find(v=>v.id===copy.id).archived,true);
+ }finally{if(child?.exitCode===null){const exit=once(child,'exit');child.kill();await exit;}await rm(dir,{recursive:true,force:true});}
+});

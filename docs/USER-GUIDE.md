@@ -1,3 +1,16 @@
+## v0.5.3 design branch: ships, setups and repeated flights
+
+1. In **Shipyard**, add a reference ship name and open its profile. It does not link to STO; select logs from the correct ship yourself.
+2. Add a loadout, then variations for different equipment setups. Keep using the same variation while equipment is unchanged.
+3. Open **Setup & runs**. **Analyze a new run with [variation]** selects that variation and asks you to import fresh combat evidence. You can create the setup before or after flying.
+4. Import the log, select the new combat and your character, confirm patrol/difficulty/party, and save. Saving opens that variation's run history.
+5. Expand **Run history**, select two matching flights, and choose **Compare selected runs** to check consistency. For equipment changes, use **Compare variations in this loadout**; all matching runs contribute equally.
+6. **Create variation from this setup** copies notes for you to revise and starts with zero runs. **Archive variation** retains evidence; use **Show archived variations** in the profile to find and restore it.
+
+A log can contain earlier flights. If saving reports overlapping evidence, reimport the updated file and select only the new encounter. Do not select Entire log when it includes previously saved combat. Rotated files from one flight can still be imported together.
+
+These are real local saves, with no demonstration ships or fabricated runs added. Back up your data folder before testing this unreleased branch.
+
 ## v0.5.0: space patrol testing
 
 Choose **Current ship workspace** to isolate a ship. Ship profiles groups its variations under loadouts; Compare limits choices to one loadout.
@@ -71,3 +84,11 @@ More: docs/USER-GUIDE.md, docs/METRICS.md, CHANGELOG.md.
 ## Ship profile names are reference labels
 
 Follow Log folder → Ship profiles → Analyze a run → Compare builds. Type a recognizable ship profile name, then create its loadout and variation. This profile is not linked to a ship in STO and does not detect the ship you flew or filter the log list. Select logs recorded while flying that ship and equipment setup, choose the correct combat stretch and character, then save it to the matching variation. If a file contains runs from different ships, select only the appropriate combat stretch.
+
+## v0.5.3 Shipyard workflow
+1. Open Shipyard and add a ship using only its reference name.
+2. Open its ship profile and add a named loadout. This creates its Baseline variation automatically.
+3. Record equipment in the Baseline notes, then save matching combat runs to it.
+4. Add a variation under the same loadout when equipment changes. Keep saving unchanged runs to the same variation.
+5. Saved runs are listed inside each variation card. Use All ships to return to Shipyard. The compact Current ship selector beside Your Shipyard changes the active workspace.
+Existing ship profiles, loadouts, variations, and saved runs are preserved.

@@ -1,3 +1,15 @@
+# v0.5.3 — LCARS interface update (design branch)
+
+- Ship → loadout → variation detail with collapsible run history and multiple flights per setup.
+- Compare two matching flights within a variation, or matching runs across variations.
+- Copy notes into new variations, archive/restore without deleting evidence, and select a setup before importing the next run.
+- Backend regression coverage for repeated flights, matching conditions, overlap rejection and persistence.
+- Compact title with opposing LCARS frames and locally bundled Antonio font.
+- Fixed desktop frame with independent content scrolling.
+- Bottom-aligned Exit and credits, colored sidebar spacer, and varied navigation colors.
+- Ship profiles precede analysis, with clear reference-only naming guidance.
+- Published download remains v0.5.1 until a v0.5.3 release is packaged and published.
+
 # v0.5.1 — Shutdown fix and security hardening
 
 - Add Exit Shakedown and automatic shutdown 15 seconds after the last browser disconnects; finish queued saves and stop parser workers.

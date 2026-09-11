@@ -17,3 +17,4 @@ input[type="checkbox"] {width:auto; margin-right:8px}
 /* User-supplied classic LCARS reference: assets/examples/lcars-classic-theme-colors.png. */
 :root{--african-violet:#baa4e5;--almond:#d29b7f;--almond-creme:#fcc19f;--barley:#edb378;--bluey:#8899ff;--brown:#895129;--butterscotch:#ea9c72;--dirty-mauve:#7a506d;--dusty-mauve:#9d698a;--lilac:#8a72a7;--mars:#ff2200;--orange:#eb943a;--red:#cf4f4f;--subdued-sienna:#c47d69;--true-mauve:#c082a9;--accent:var(--almond-creme);--lavender:var(--african-violet);--blue:var(--bluey)}
 .run-confirmation{display:block;margin-top:16px;margin-bottom:22px}
+
