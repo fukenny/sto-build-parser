@@ -1,6 +1,6 @@
 # Amber LCARS design checkpoint — 0.5.4.1
 
-Approved visual preview: open index.html in this folder. The working app has not adopted this frame yet.
+Approved visual preview: open index.html in this folder. The working app now uses this amber frame in 0.5.4.1. The example body remains a separate design study.
 
 ## Approved frame
 - Compact STO Shakedown top strip with a small tagline.
