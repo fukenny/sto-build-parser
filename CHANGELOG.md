@@ -1,3 +1,7 @@
+# v0.5.4 — In development
+
+- Add space above and below Compare selected runs in variation history.
+
 # v0.5.3 — LCARS interface update
 
 - Ship → loadout → variation detail with collapsible run history and multiple flights per setup.
