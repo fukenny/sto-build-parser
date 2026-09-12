@@ -160,6 +160,7 @@ function patrolForm(prefix,value={}) {
 function patrolValue(prefix){return {battleType:$(prefix+'-battle-type').value,missionName:$(prefix+'-battle-type').value==='TFO'?$(prefix+'-tfo').value:$(prefix+'-name').value,patrolId:$(prefix+'-mission').value,difficulty:$(prefix+'-difficulty').value,party:$(prefix+'-party').value};}
 for(const prefix of ['save','compare']){const form=patrolForm(prefix);$(prefix+'-patrol').innerHTML=form.html;form.bind();}
 function renderShips(){
+ renderWorkspacePicker();
 
  const selected=state.profiles.find(p=>p.id===activeShip)||state.profiles[0];
  const loadouts=state.loadouts.filter(l=>l.profileId===selected?.id);
@@ -214,3 +215,11 @@ function renameShip(id){
 function setCreationForm(kind){creationForm=kind;$('loadout-form').hidden=kind!=='loadout';$('variation-form').hidden=kind!=='variation';$('show-loadout-form').setAttribute('aria-pressed',kind==='loadout');$('show-variation-form').setAttribute('aria-pressed',kind==='variation');}
 $('show-loadout-form').onclick=()=>setCreationForm('loadout');
 $('show-variation-form').onclick=()=>setCreationForm('variation');
+
+function renderWorkspacePicker(){
+ const profile=state.profiles.find(p=>p.id===activeShip);
+ $('workspace-current').textContent=profile?.name||'No ship selected';
+ $('workspace-choices').innerHTML=state.profiles.map(p=>`<button class="workspace-ship-pill" data-workspace-id="${esc(p.id)}" aria-pressed="${p.id===activeShip}" title="${esc(p.name)}">${esc(p.name)}</button>`).join('')||'<p>No ships yet. Add your first ship in Shipyard.</p>';
+}
+$('toggle-ship-picker').onclick=()=>{const open=$('workspace-choices').hidden;$('workspace-choices').hidden=!open;$('workspace-current').hidden=open;$('toggle-ship-picker').setAttribute('aria-expanded',String(open));};
+$('workspace-choices').onclick=e=>{const id=e.target.dataset.workspaceId;if(!id)return;const wasDetail=!$('variation-detail').hidden;chooseShip(id);$('workspace-choices').hidden=true;$('workspace-current').hidden=false;$('toggle-ship-picker').setAttribute('aria-expanded','false');if(wasDetail)page('builds');$('toggle-ship-picker').focus();};
