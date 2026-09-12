@@ -68,3 +68,10 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 @media(max-width:720px){.console-top{flex:none;height:30px}.console-top:after{display:none}.top-content h2{font-size:22px}.console-body{background:#000;border-radius:0}.console-body>.body-rail{position:relative;left:auto;right:auto;height:38px}.console-body>.body-rail:before{height:38px}.console-body>.body-rail:after{font-size:30px;height:38px}.lcars-console .brand{background:linear-gradient(110deg,#885018,#ed971e);height:50px;min-height:50px;padding:16px;border-radius:35px 0 0 0}.lcars-console main{margin-top:0;border-radius:0}}
 
 @media(min-width:721px){.console-body:before{content:'';position:absolute;left:var(--sidebar);right:0;top:44px;height:40px;border-radius:34px 0 0 0;background:#000;pointer-events:none}}
+
+/* Align frame caps and isolate the elbow from the continuous yellow rail. */
+.console-top>.top-ident,.console-top>.console-rail{height:16px;align-self:center;margin-block:0}
+.console-body>.body-rail{left:calc(var(--sidebar) + 65px);background:#000;padding-left:7px;gap:0}
+.console-body>.body-rail:before{background:linear-gradient(90deg,#f7de60,#bba548)}
+.lcars-console main{border-top-left-radius:0}
+@media(max-width:720px){.console-body>.body-rail{left:auto}}
