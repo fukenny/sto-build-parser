@@ -3,7 +3,7 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = value => new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(value||0);
 const compact = value => new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(value||0);
-let detailId=null;
+let detailId=null,creationForm='loadout';
 function openLoadoutComparison(id){
  $('compare-loadout').value=id;buildOptions();
  const builds=shipBuilds().filter(b=>b.loadoutId===id&&!b.archived);
@@ -171,7 +171,7 @@ function renderShips(){
  $('profile-title').textContent=profile?profile.name+' / Ship profile':'Choose a ship in Shipyard';
  $('profile-content').hidden=!profile;
  options('loadout',state.loadouts.filter(l=>l.profileId===activeShip).map(l=>({value:l.id,label:l.name})));
- $('variation-form').hidden=!$('loadout').options.length;
+ $('show-variation-form').disabled=!$('loadout').options.length;setCreationForm($('loadout').options.length&&creationForm==='variation'?'variation':'loadout');
 }
 function chooseShip(id){detailId=null;$('analysis-target').textContent='';$('analysis-target').hidden=true;activeShip=id;$('loadout').value='';$('workspace-ship').value=id;renderShips();buildOptions();renderBuilds();$('comparison').innerHTML='<p>Select variations in this ship’s loadout to compare.</p>';}
 $('workspace-ship').onchange=()=>{chooseShip($('workspace-ship').value);if(!$('shipyard').hidden||!$('variation-detail').hidden)page('builds');};
@@ -210,3 +210,7 @@ function renameShip(id){
  dialog.querySelector('form').onsubmit=async e=>{e.preventDefault();const button=dialog.querySelector('[type=submit]');button.disabled=true;try{await api('profile/rename',{id,name:input.value});await refresh();dialog.close();notice('Ship renamed. All saved runs retained.');}catch(error){dialog.querySelector('[role=alert]').textContent=error.message;button.disabled=false;}};
  dialog.showModal();input.focus();input.select();
 }
+
+function setCreationForm(kind){creationForm=kind;$('loadout-form').hidden=kind!=='loadout';$('variation-form').hidden=kind!=='variation';$('show-loadout-form').setAttribute('aria-pressed',kind==='loadout');$('show-variation-form').setAttribute('aria-pressed',kind==='variation');}
+$('show-loadout-form').onclick=()=>setCreationForm('loadout');
+$('show-variation-form').onclick=()=>setCreationForm('variation');
