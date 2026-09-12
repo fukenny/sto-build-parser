@@ -33,6 +33,15 @@ test('real workflow saves repeated flights, compares, archives, restores and cop
  const c=(await post('run',{...input,buildId:copy.id,encounterId:analysis.encounters[2].id})).value;
  assert.equal((await post('runs/compare',{ids:[a.id,c.id]})).status,400);
  const compare=await post('compare',{...input,baseline:build.id,candidate:copy.id});assert.equal(compare.status,200);assert.equal(compare.value.baseline.count,2);assert.equal(compare.value.candidate.count,1);
+ const tfo={...input,battleType:'TFO',missionName:' Infected   Space '};
+ assert.equal((await post('run/edit',{...tfo,id:a.id})).status,200);
+ assert.equal((await post('run/edit',{...tfo,id:c.id,buildId:copy.id})).status,200);
+ const tfoComparison=await post('compare',{...tfo,missionName:'infected space',baseline:build.id,candidate:copy.id});assert.equal(tfoComparison.status,200);assert.equal(tfoComparison.value.baseline.count,1);assert.equal(tfoComparison.value.candidate.count,1);
+ assert.equal((await post('runs/compare',{ids:[a.id,b.id]})).status,400);
+ assert.equal((await post('run/edit',{...tfo,id:b.id,missionName:' '})).status,400);
+ assert.equal((await post('run/edit',{...tfo,id:b.id,battleType:'DSE'})).status,200);
+ assert.equal((await post('runs/compare',{ids:[a.id,b.id]})).status,400);
+ const dse=await post('compare',{...tfo,battleType:'DSE',baseline:build.id,candidate:copy.id});assert.equal(dse.status,200);assert.equal(dse.value.baseline.count,1);assert.equal(dse.value.candidate.count,0);
  await post('variation/archive',{id:copy.id,archived:true});await post('shutdown',{});await exited;
  const persisted=JSON.parse(await readFile(path.join(dir,'data/state.json'),'utf8'));assert.equal(persisted.runs.filter(r=>r.buildId===build.id).length,2);assert.equal(persisted.runs.filter(r=>r.buildId===copy.id).length,1);assert.equal(persisted.builds.find(v=>v.id===copy.id).archived,true);
  }finally{if(child?.exitCode===null){const exit=once(child,'exit');child.kill();await exit;}await rm(dir,{recursive:true,force:true});}

@@ -1,3 +1,7 @@
+## v0.5.4 battle types (in development)
+
+When saving, select Battle type first: Patrol, TFO, or DSE. Patrol uses the existing category and mission menus. TFO and DSE use a typed mission name; use consistent spelling across runs. Matching ignores letter case and extra spaces. Difficulty and Solo/Group remain required. Ground combat remains unsupported. The same controls appear when correcting a run or comparing variations. Existing patrol saves require no migration.
+
 ## v0.5.3 design branch: ships, setups and repeated flights
 
 1. In **Shipyard**, add a reference ship name and open its profile. It does not link to STO; select logs from the correct ship yourself.

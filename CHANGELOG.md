@@ -1,5 +1,6 @@
 # v0.5.4 — In development
 
+- Add space-only Patrol/TFO/DSE battle types to saving, corrections, and comparisons. TFO and DSE use typed mission names for now; existing patrol records remain compatible.
 - Add space above and below Compare selected runs in variation history.
 
 # v0.5.3 — LCARS interface update

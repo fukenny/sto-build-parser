@@ -12,9 +12,19 @@ export const patrols = Object.entries(groups).flatMap(([category,names])=>names.
  random:/^(Bringers of War|Jupiter Gauntlet|The Ninth Rule)/.test(name)
 })));
 export const difficulties=['Normal','Advanced','Elite'];
+export const battleTypes=['Patrol','TFO','DSE'];
+const missionName=value=>typeof value==='string'?value.trim().replace(/\s+/g,' '):'';
 export function conditions(input) {
+ const battleType=input.battleType??'Patrol';
+ if(!battleTypes.includes(battleType)||!difficulties.includes(input.difficulty)||!['Solo','Group'].includes(input.party))throw new Error('Choose a battle type, difficulty, and Solo / Group.');
  const patrol=patrols.find(p=>p.id===input.patrolId);
- if(!patrol || !difficulties.includes(input.difficulty) || !['Solo','Group'].includes(input.party)) throw new Error('Choose a listed space patrol, difficulty, and Solo / Group.');
- return {patrolId:patrol.id,difficulty:input.difficulty,party:input.party,context:`${patrol.name} / ${input.difficulty} / ${input.party}`};
+ const mission=battleType==='Patrol'?'':missionName(input.missionName);
+ if(battleType==='Patrol'&&!patrol)throw new Error('Choose a listed space patrol.');
+ if(battleType!=='Patrol'&&(!mission||mission.length>200))throw new Error('Enter a mission name up to 200 characters.');
+ return {battleType,patrolId:battleType==='Patrol'?patrol.id:null,missionName:mission,difficulty:input.difficulty,party:input.party,context:(battleType==='Patrol'?patrol.name:battleType+' / '+mission)+' / '+input.difficulty+' / '+input.party};
 }
-export const conditionKey=r=>r.patrolId ? `${r.patrolId}|${r.difficulty}|${r.party}` : '';
+export const conditionKey=r=>{
+ const type=r.battleType??'Patrol';
+ const mission=type==='Patrol'?r.patrolId:missionName(r.missionName).toLowerCase();
+ return mission?JSON.stringify([type,mission,r.difficulty,r.party]):'';
+};
