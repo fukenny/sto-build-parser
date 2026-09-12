@@ -102,3 +102,5 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 
 .lcars-console .loadout-group .build-card{border-radius:0}
 .lcars-console #build-list>.loadout-group:first-child .build-card:first-child{border-top-left-radius:52px 34px}
+
+.lcars-console .loadout-group .build-grid{gap:6px}
