@@ -199,7 +199,7 @@ $('back-profile').onclick=()=>page('builds');
 
 function renameShip(id){
  const profile=state.profiles.find(p=>p.id===id);if(!profile)return;
- const dialog=document.createElement('dialog');dialog.innerHTML='<form><h2>Rename ship</h2><label>Reference ship name<input required maxlength="300" name="name"></label><p>Your loadouts, variations, and saved runs stay with this ship.</p><p role="alert"></p><div class="variation-actions"><button type="submit">Save name</button><button type="button">Cancel</button></div></form>';
+ const dialog=document.createElement('dialog');dialog.innerHTML='<form autocomplete="off"><h2>Rename ship</h2><label>Reference ship name<input required maxlength="300" name="ship-reference-label" autocomplete="off" autocapitalize="off" spellcheck="false" data-form-type="other"></label><p>Your loadouts, variations, and saved runs stay with this ship.</p><p role="alert"></p><div class="variation-actions"><button type="submit">Save name</button><button type="button">Cancel</button></div></form>';
  document.body.append(dialog);const input=dialog.querySelector('input');input.value=profile.name;dialog.onclose=()=>dialog.remove();dialog.querySelector('[type=button]').onclick=()=>dialog.close();
  dialog.querySelector('form').onsubmit=async e=>{e.preventDefault();const button=dialog.querySelector('[type=submit]');button.disabled=true;try{await api('profile/rename',{id,name:input.value});await refresh();dialog.close();notice('Ship renamed. All saved runs retained.');}catch(error){dialog.querySelector('[role=alert]').textContent=error.message;button.disabled=false;}};
  dialog.showModal();input.focus();input.select();
