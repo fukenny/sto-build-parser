@@ -80,3 +80,6 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 .lcars-console h1,.lcars-console h2,.lcars-console h3,.lcars-console h4,.lcars-console h5,.lcars-console h6,.lcars-console .panel h2,.lcars-console #variation-content summary,.lcars-console .body-rail:after{color:var(--orange)}
 .lcars-console main button.primary{background:#baa4e5;color:#171020;border-color:#baa4e5}
 .lcars-console main button:disabled,.lcars-console dialog button:disabled{opacity:.5}
+
+/* Local workspace indicator: a small illuminated green LED. */
+.lcars-console .aside-bottom>.dot{background:#54ef83;box-shadow:0 0 3px #27bd58,0 0 7px #27bd5880;border:1px solid #239947}
