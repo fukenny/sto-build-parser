@@ -1,5 +1,6 @@
-# v0.5.4 — In development
+# v0.5.5 — Amber LCARS and battle types
 
+- Amber LCARS frame, orange headlines, selective lavender actions and green workspace indicator.
 - Add space-only Patrol/TFO/Other battle types to saving, corrections, and comparisons. TFO uses an alphabetical space-mission catalog; Other accepts typed mission names. Existing patrol and DSE records remain compatible.
 - Add space above and below Compare selected runs in variation history.
 

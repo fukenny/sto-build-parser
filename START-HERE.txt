@@ -8,7 +8,7 @@ Older runs: Edit label / version to confirm patrol settings before comparing.
 Compare now includes weapon/ability and combined pet-source damage and DPS.
 Asterisk = randomized enemies can affect results. Pet ranks are not guessed.
 
-STO SHAKEDOWN v0.5.3 - QUICK START
+STO SHAKEDOWN v0.5.5 - QUICK START
 Created by Kenneth Solans
 
 1. Extract the complete Windows x64 portable ZIP into a writable folder.

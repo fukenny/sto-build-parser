@@ -4,9 +4,9 @@ Test your Star Trek Online ship builds using space-patrol combat logs.
 
 [Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
-## New in v0.5.3
+## New in v0.5.5
 
-The Windows alpha now includes the new LCARS layout and Shipyard workflow.
+The Windows alpha includes the amber LCARS frame, orange headlines, and Patrol / TFO / Other battle selection. TFO offers 42 space missions; Other accepts a mission name for DSEs, episodes, or unlisted encounters.
 
 - Create a ship, then its loadouts and equipment variations.
 - Open **Setup & runs** to expand run history and compare two unchanged flights.
@@ -18,7 +18,7 @@ See the [updated user guide](docs/USER-GUIDE.md) for the full workflow.
 
 ## Download for Windows
 
-### [Download STO Shakedown v0.5.3 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.3/sto-shakedown-v0.5.3-windows-x64.zip)
+### [Download STO Shakedown v0.5.5 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.5/sto-shakedown-v0.5.5-windows-x64.zip)
 
 **Free fan-project preview · Windows x64 · No Node, npm, or Codex installation needed.**
 
