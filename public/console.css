@@ -106,3 +106,6 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 .lcars-console .loadout-group .build-grid{gap:6px}
 
 .workspace-selector{width:100%;display:grid;grid-template-columns:180px minmax(0,1fr);gap:24px;align-items:start;text-align:left;border-top:10px solid #dca845;border-left:28px solid #dca845;border-bottom:10px solid #dca845;border-top-left-radius:52px 34px;padding:20px 24px}.workspace-selection{min-width:0}#workspace-current{font:25px Antonio;color:var(--orange);padding:8px 0;overflow-wrap:anywhere}#workspace-choices{display:flex;flex-wrap:wrap;gap:6px}.lcars-console #toggle-ship-picker,.lcars-console .workspace-ship-pill{border-radius:32px;padding:12px 22px;font:22px Antonio;background:#d6aa46;color:#191206}.lcars-console .workspace-ship-pill{max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:clip}.lcars-console .workspace-ship-pill[aria-pressed='true']{background:#f8df83}.workspace-heading{border-bottom:0;padding-bottom:0}@media(max-width:720px){.workspace-selector{grid-template-columns:1fr;padding:16px;gap:12px}}
+
+/* Ship selector uses a lower LCARS elbow, open across the top. */
+.workspace-selector{border-top:0;border-right:0;border-left:28px solid #dca845;border-bottom:10px solid #dca845;border-radius:0 0 0 52px / 0 0 0 34px}
