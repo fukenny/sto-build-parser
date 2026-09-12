@@ -160,7 +160,13 @@ function patrolForm(prefix,value={}) {
 function patrolValue(prefix){return {battleType:$(prefix+'-battle-type').value,missionName:$(prefix+'-battle-type').value==='TFO'?$(prefix+'-tfo').value:$(prefix+'-name').value,patrolId:$(prefix+'-mission').value,difficulty:$(prefix+'-difficulty').value,party:$(prefix+'-party').value};}
 for(const prefix of ['save','compare']){const form=patrolForm(prefix);$(prefix+'-patrol').innerHTML=form.html;form.bind();}
 function renderShips(){
- $('ship-cards').innerHTML=state.profiles.map(p=>`<article class="panel"><h2>${esc(p.name)}</h2><p>${state.loadouts.filter(l=>l.profileId===p.id).length} loadouts</p><button data-ship="${esc(p.id)}">Open ship profile →</button> <button data-rename-ship="${esc(p.id)}">Rename ship</button></article>`).join('')||'<p>No ships yet. Add your first ship above.</p>';
+
+ const selected=state.profiles.find(p=>p.id===activeShip)||state.profiles[0];
+ const loadouts=state.loadouts.filter(l=>l.profileId===selected?.id);
+ const variations=state.builds.filter(b=>loadouts.some(l=>l.id===b.loadoutId));
+ const runs=state.runs.filter(r=>variations.some(b=>b.id===r.buildId));
+ $('ship-cards').innerHTML=selected?`<div class="ship-pill-list" aria-label="Your ships">${state.profiles.map(p=>`<button class="ship-pill ${p.id===selected.id?'selected':''}" data-select-ship="${esc(p.id)}" title="${esc(p.name)}" aria-pressed="${p.id===selected.id}">${esc(p.name)}</button>`).join('')}</div><article class="ship-detail"><h2>${esc(selected.name)}</h2><p>Reference ship profile · organize your equipment setups and combat evidence.</p><dl class="ship-counts"><div><dt>Loadouts</dt><dd>${loadouts.length}</dd></div><div><dt>Variations</dt><dd>${variations.length}</dd></div><div><dt>Runs</dt><dd>${runs.length}</dd></div></dl><h3>Loadouts</h3><ul>${loadouts.map(l=>`<li>${esc(l.name)}</li>`).join('')||'<li>No loadouts yet.</li>'}</ul><div class="variation-actions"><button class="primary" data-ship="${esc(selected.id)}">Open ship profile →</button><button data-rename-ship="${esc(selected.id)}">Rename ship</button></div></article>`:'<p>No ships yet. Add your first ship above.</p>';
+
  const profile=state.profiles.find(p=>p.id===activeShip);
  $('profile-title').textContent=profile?profile.name+' / Ship profile':'Choose a ship in Shipyard';
  $('profile-content').hidden=!profile;
@@ -169,7 +175,7 @@ function renderShips(){
 }
 function chooseShip(id){detailId=null;$('analysis-target').textContent='';$('analysis-target').hidden=true;activeShip=id;$('loadout').value='';$('workspace-ship').value=id;renderShips();buildOptions();renderBuilds();$('comparison').innerHTML='<p>Select variations in this ship’s loadout to compare.</p>';}
 $('workspace-ship').onchange=()=>{chooseShip($('workspace-ship').value);if(!$('shipyard').hidden||!$('variation-detail').hidden)page('builds');};
-$('ship-cards').onclick=e=>{if(e.target.dataset.renameShip){renameShip(e.target.dataset.renameShip);return;}if(e.target.dataset.ship){chooseShip(e.target.dataset.ship);page('builds');}};
+$('ship-cards').onclick=e=>{if(e.target.dataset.selectShip){chooseShip(e.target.dataset.selectShip);return;}if(e.target.dataset.renameShip){renameShip(e.target.dataset.renameShip);return;}if(e.target.dataset.ship){chooseShip(e.target.dataset.ship);page('builds');}};
 $('compare-loadout').onchange=()=>{buildOptions();$('comparison').innerHTML='<p>Choose variations to compare.</p>';};
 function contributionTables(result){
  const table=(title,rows)=>`<h2>${title}</h2><div class="table-wrap"><table><thead><tr><th>Recorded source / ability</th><th>Baseline mean damage</th><th>Candidate mean damage</th><th>Baseline DPS</th><th>Candidate DPS</th><th>DPS change</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}<br><small>${esc(r.source)}</small></td><td>${r.baseline?num(r.baseline.damage):'Not recorded'}</td><td>${r.candidate?num(r.candidate.damage):'Not recorded'}</td><td>${r.baseline?num(r.baseline.dps):'Not recorded'}</td><td>${r.candidate?num(r.candidate.dps):'Not recorded'}</td><td>${r.delta===null?'—':(r.delta>=0?'+':'')+num(r.delta)}${r.percent===null?'': ' ('+(r.percent>=0?'+':'')+r.percent.toFixed(1)+'%)'}</td></tr>`).join('')||'<tr><td colspan="6">No recorded contributions to compare.</td></tr>'}</tbody></table></div>`;
