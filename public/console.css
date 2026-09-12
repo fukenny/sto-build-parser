@@ -99,3 +99,6 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 @media(max-width:850px){.ship-detail,.profile-create-fields{border-left-width:32px;border-top-left-radius:64px 44px}.profile-create-fields{padding:20px}.lcars-console .loadout-group .build-card{padding:18px}}
 
 .lcars-console .loadout-group .build-card{border-bottom:10px solid #dca845;border-radius:52px 0 0 0 / 34px 0 0 0}
+
+.lcars-console .loadout-group .build-card{border-radius:0}
+.lcars-console #build-list>.loadout-group:first-child .build-card:first-child{border-top-left-radius:52px 34px}
