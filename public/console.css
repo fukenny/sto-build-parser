@@ -109,3 +109,8 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 
 /* Ship selector uses a lower LCARS elbow, open across the top. */
 .workspace-selector{border-top:0;border-right:0;border-left:28px solid #dca845;border-bottom:10px solid #dca845;border-radius:0 0 0 52px / 0 0 0 34px}
+
+/* Match the space above the selector area and below its button. */
+.lcars-console main{padding-top:12.5px}
+.workspace-selector{padding-bottom:12.5px}
+@media(max-width:720px){.lcars-console main{padding-top:12px}.workspace-selector{padding-bottom:12px}}
