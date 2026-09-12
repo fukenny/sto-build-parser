@@ -83,3 +83,5 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 
 /* Local workspace indicator: a small illuminated green LED. */
 .lcars-console .aside-bottom>.dot{background:#54ef83;box-shadow:0 0 3px #27bd58,0 0 7px #27bd5880;border:1px solid #239947}
+
+.run-editor{scroll-margin-top:24px}.run-editor .edit-confirmation{display:block;padding-block:20px;margin-block:8px}.run-editor .confirm{width:auto;margin-right:8px}

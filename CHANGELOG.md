@@ -1,3 +1,9 @@
+# v0.5.6 — In development
+
+- Rename ships from Your Ships while preserving loadouts, variations and runs.
+- Scroll and focus the run correction editor when opened.
+- Add vertical spacing around the editor confirmation checkbox.
+
 # v0.5.5 — Amber LCARS and battle types
 
 - Amber LCARS frame, orange headlines, selective lavender actions and green workspace indicator.

@@ -42,7 +42,11 @@ test('real workflow saves repeated flights, compares, archives, restores and cop
  assert.equal((await post('run/edit',{...tfo,id:b.id,battleType:'DSE'})).status,200);
  assert.equal((await post('runs/compare',{ids:[a.id,b.id]})).status,400);
  const dse=await post('compare',{...tfo,battleType:'DSE',baseline:build.id,candidate:copy.id});assert.equal(dse.status,200);assert.equal(dse.value.baseline.count,1);assert.equal(dse.value.candidate.count,0);
+ const other=(await post('profile',{name:'Another ship'})).value;
+ assert.equal((await post('profile/rename',{id:ship.id,name:'Another ship'})).status,400);
+ assert.equal((await post('profile/rename',{id:ship.id,name:' '})).status,400);
+ const renamed=await post('profile/rename',{id:ship.id,name:'Renamed ship'});assert.equal(renamed.status,200);assert.equal(renamed.value.id,ship.id);
  await post('variation/archive',{id:copy.id,archived:true});await post('shutdown',{});await exited;
- const persisted=JSON.parse(await readFile(path.join(dir,'data/state.json'),'utf8'));assert.equal(persisted.runs.filter(r=>r.buildId===build.id).length,2);assert.equal(persisted.runs.filter(r=>r.buildId===copy.id).length,1);assert.equal(persisted.builds.find(v=>v.id===copy.id).archived,true);
+ const persisted=JSON.parse(await readFile(path.join(dir,'data/state.json'),'utf8'));assert.equal(persisted.runs.filter(r=>r.buildId===build.id).length,2);assert.equal(persisted.runs.filter(r=>r.buildId===copy.id).length,1);assert.equal(persisted.builds.find(v=>v.id===copy.id).archived,true);assert.equal(persisted.profiles.find(p=>p.id===ship.id).name,'Renamed ship');assert.ok(persisted.builds.filter(b=>b.loadoutId===build.loadoutId).every(b=>b.ship==='Renamed ship'));
  }finally{if(child?.exitCode===null){const exit=once(child,'exit');child.kill();await exit;}await rm(dir,{recursive:true,force:true});}
 });

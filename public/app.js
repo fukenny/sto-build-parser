@@ -160,7 +160,7 @@ function patrolForm(prefix,value={}) {
 function patrolValue(prefix){return {battleType:$(prefix+'-battle-type').value,missionName:$(prefix+'-battle-type').value==='TFO'?$(prefix+'-tfo').value:$(prefix+'-name').value,patrolId:$(prefix+'-mission').value,difficulty:$(prefix+'-difficulty').value,party:$(prefix+'-party').value};}
 for(const prefix of ['save','compare']){const form=patrolForm(prefix);$(prefix+'-patrol').innerHTML=form.html;form.bind();}
 function renderShips(){
- $('ship-cards').innerHTML=state.profiles.map(p=>`<article class="panel"><h2>${esc(p.name)}</h2><p>${state.loadouts.filter(l=>l.profileId===p.id).length} loadouts</p><button data-ship="${esc(p.id)}">Open ship profile →</button></article>`).join('')||'<p>No ships yet. Add your first ship above.</p>';
+ $('ship-cards').innerHTML=state.profiles.map(p=>`<article class="panel"><h2>${esc(p.name)}</h2><p>${state.loadouts.filter(l=>l.profileId===p.id).length} loadouts</p><button data-ship="${esc(p.id)}">Open ship profile →</button> <button data-rename-ship="${esc(p.id)}">Rename ship</button></article>`).join('')||'<p>No ships yet. Add your first ship above.</p>';
  const profile=state.profiles.find(p=>p.id===activeShip);
  $('profile-title').textContent=profile?profile.name+' / Ship profile':'Choose a ship in Shipyard';
  $('profile-content').hidden=!profile;
@@ -169,7 +169,7 @@ function renderShips(){
 }
 function chooseShip(id){detailId=null;$('analysis-target').textContent='';$('analysis-target').hidden=true;activeShip=id;$('loadout').value='';$('workspace-ship').value=id;renderShips();buildOptions();renderBuilds();$('comparison').innerHTML='<p>Select variations in this ship’s loadout to compare.</p>';}
 $('workspace-ship').onchange=()=>{chooseShip($('workspace-ship').value);if(!$('shipyard').hidden||!$('variation-detail').hidden)page('builds');};
-$('ship-cards').onclick=e=>{if(e.target.dataset.ship){chooseShip(e.target.dataset.ship);page('builds');}};
+$('ship-cards').onclick=e=>{if(e.target.dataset.renameShip){renameShip(e.target.dataset.renameShip);return;}if(e.target.dataset.ship){chooseShip(e.target.dataset.ship);page('builds');}};
 $('compare-loadout').onchange=()=>{buildOptions();$('comparison').innerHTML='<p>Choose variations to compare.</p>';};
 function contributionTables(result){
  const table=(title,rows)=>`<h2>${title}</h2><div class="table-wrap"><table><thead><tr><th>Recorded source / ability</th><th>Baseline mean damage</th><th>Candidate mean damage</th><th>Baseline DPS</th><th>Candidate DPS</th><th>DPS change</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}<br><small>${esc(r.source)}</small></td><td>${r.baseline?num(r.baseline.damage):'Not recorded'}</td><td>${r.candidate?num(r.candidate.damage):'Not recorded'}</td><td>${r.baseline?num(r.baseline.dps):'Not recorded'}</td><td>${r.candidate?num(r.candidate.dps):'Not recorded'}</td><td>${r.delta===null?'—':(r.delta>=0?'+':'')+num(r.delta)}${r.percent===null?'': ' ('+(r.percent>=0?'+':'')+r.percent.toFixed(1)+'%)'}</td></tr>`).join('')||'<tr><td colspan="6">No recorded contributions to compare.</td></tr>'}</tbody></table></div>`;
@@ -177,10 +177,10 @@ function contributionTables(result){
 }
 function editRunHandler(event){
  if(event.target.dataset.openVariation){detailId=event.target.dataset.openVariation;renderVariation();page('variation-detail');return;}
- const id=event.target.dataset.editRun;if(!id)return;const r=state.runs.find(r=>r.id===id),card=event.target.closest('article');if(card.querySelector('.run-editor'))return;
+ const id=event.target.dataset.editRun;if(!id)return;const r=state.runs.find(r=>r.id===id),card=event.target.closest('article');if(card.querySelector('.run-editor'))card.querySelector('.run-editor').remove();
  const editor=document.createElement('div');editor.className='run-editor';const prefix='edit-'+id,form=patrolForm(prefix,r);
- editor.innerHTML=form.html+`<label>Variation<select class="edit-build">${shipBuilds().map(b=>`<option value="${esc(b.id)}" ${b.id===r.buildId?'selected':''}>${esc(buildLabel(b))}</option>`).join('')}</select></label><label><input type="checkbox" class="confirm"> Complete space battle; equipment unchanged; no ground combat.</label><button class="apply-edit">Save correction</button><button class="cancel-edit">Cancel</button>`;
- card.append(editor);form.bind();editor.querySelector('.cancel-edit').onclick=()=>editor.remove();editor.querySelector('.apply-edit').onclick=async()=>{try{await api('run/edit',{id,...patrolValue(prefix),spaceConfirmed:editor.querySelector('.confirm').checked,buildId:editor.querySelector('.edit-build').value});await refresh();notice('Run updated; previous workspace backed up.');}catch(e){notice(e.message,true);}};
+ editor.innerHTML=form.html+`<label>Variation<select class="edit-build">${shipBuilds().map(b=>`<option value="${esc(b.id)}" ${b.id===r.buildId?'selected':''}>${esc(buildLabel(b))}</option>`).join('')}</select></label><label class="edit-confirmation"><input type="checkbox" class="confirm"> Complete space battle; equipment unchanged; no ground combat.</label><button class="apply-edit">Save correction</button><button class="cancel-edit">Cancel</button>`;
+ card.append(editor);form.bind();editor.scrollIntoView({block:'start',behavior:'smooth'});editor.querySelector('select').focus({preventScroll:true});editor.querySelector('.cancel-edit').onclick=()=>editor.remove();editor.querySelector('.apply-edit').onclick=async()=>{try{await api('run/edit',{id,...patrolValue(prefix),spaceConfirmed:editor.querySelector('.confirm').checked,buildId:editor.querySelector('.edit-build').value});await refresh();notice('Run updated; previous workspace backed up.');}catch(e){notice(e.message,true);}};
 }
 $('profile-content').addEventListener('click',editRunHandler);
 $('variation-content').addEventListener('click',editRunHandler);
@@ -196,3 +196,11 @@ action('add-loadout',async()=>{const build=await api('loadout',{profileId:active
 
 $('show-archived').onchange=renderBuilds;
 $('back-profile').onclick=()=>page('builds');
+
+function renameShip(id){
+ const profile=state.profiles.find(p=>p.id===id);if(!profile)return;
+ const dialog=document.createElement('dialog');dialog.innerHTML='<form><h2>Rename ship</h2><label>Reference ship name<input required maxlength="300" name="name"></label><p>Your loadouts, variations, and saved runs stay with this ship.</p><p role="alert"></p><div class="variation-actions"><button type="submit">Save name</button><button type="button">Cancel</button></div></form>';
+ document.body.append(dialog);const input=dialog.querySelector('input');input.value=profile.name;dialog.onclose=()=>dialog.remove();dialog.querySelector('[type=button]').onclick=()=>dialog.close();
+ dialog.querySelector('form').onsubmit=async e=>{e.preventDefault();const button=dialog.querySelector('[type=submit]');button.disabled=true;try{await api('profile/rename',{id,name:input.value});await refresh();dialog.close();notice('Ship renamed. All saved runs retained.');}catch(error){dialog.querySelector('[role=alert]').textContent=error.message;button.disabled=false;}};
+ dialog.showModal();input.focus();input.select();
+}

@@ -161,6 +161,16 @@ const server = http.createServer(async (req,res)=>{
         result.message='Same equipment, two flights. This shows run-to-run consistency, not an equipment improvement.';
         return json({...result,runs:runs.map(r=>({id:r.id,stamp:r.stamp,context:r.context}))});
       }
+      if(url.pathname === '/api/profile/rename') {
+        return json(await store.transact(state=>{
+          const profile=state.profiles.find(p=>p.id===b.id);demand(profile,'Choose a saved ship.');
+          const name=text(b.name,'a ship name');
+          demand(!state.profiles.some(p=>p.id!==profile.id&&p.name.toLowerCase()===name.toLowerCase()),'That ship name already exists.');
+          const loadouts=new Set(state.loadouts.filter(l=>l.profileId===profile.id).map(l=>l.id));
+          profile.name=name;for(const build of state.builds)if(loadouts.has(build.loadoutId))build.ship=name;
+          return profile;
+        }));
+      }
       if(url.pathname === '/api/profile') {
         return json(await store.transact(state=>{
           const name=text(b.name,'a ship name');
