@@ -154,7 +154,7 @@ const server = http.createServer(async (req,res)=>{
         const [a,c]=runs;
         demand(a.buildId===c.buildId,'Select runs from the same variation. Use Compare builds for different setups.');
         demand(a.player.id===c.player.id,'Choose runs for the same character.');
-        demand(a.spaceConfirmed && c.spaceConfirmed && conditionKey(a)===conditionKey(c),'Choose confirmed runs with matching patrol, difficulty, and Solo / Group.');
+        demand(a.spaceConfirmed && c.spaceConfirmed && conditionKey(a)===conditionKey(c),'Choose confirmed runs with matching battle type, mission, difficulty, and Solo / Group.');
         demand((a.scope||'encounter')===(c.scope||'encounter'),'Choose runs using the same combat scope.');
         demand(!(a.encounterIds||[a.encounterId]).some(id=>(c.encounterIds||[c.encounterId]).includes(id)),'These runs overlap the same combat evidence.');
         const result=compareRuns([a],[c]);
@@ -205,7 +205,7 @@ const server = http.createServer(async (req,res)=>{
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Select a build version.');
         demand(!build.archived,'Restore this variation before adding more runs.');
         const metadata=conditions(b),context=metadata.context;
-        demand(b.spaceConfirmed===true,'Confirm this selection is one complete space patrol with unchanged equipment. Ground combat is unsupported.');
+        demand(b.spaceConfirmed===true,'Confirm this selection is one complete space battle with unchanged equipment. Ground combat is unsupported.');
         const encounterIds=encounter.encounterIds || [encounter.id];
         demand(!state.runs.some(r=>r.player.id===player.id && (r.encounterIds || [r.encounterId]).some(id=>encounterIds.includes(id))),'This selection includes combat already saved for this player. Reimport the updated log after flying again, then select only the new encounter. Entire log may include your earlier run.');
         const run={id:randomUUID(),buildId:build.id,encounterId:encounter.id,context,player,stamp:encounter.stamp,duration:encounter.duration,file:analysis.file,parserVersion:analysis.parserVersion,savedAt:new Date().toISOString()};
@@ -218,7 +218,7 @@ const server = http.createServer(async (req,res)=>{
         return json(await store.transact(async state=>{
         const run=state.runs.find(r=>r.id===b.id); demand(run,'Choose a saved run.');
         const metadata=conditions(b),context=metadata.context;
-        demand(b.spaceConfirmed===true,'Confirm this saved run covers one complete space patrol with unchanged equipment.');
+        demand(b.spaceConfirmed===true,'Confirm this saved run covers one complete space battle with unchanged equipment.');
         const build=state.builds.find(x=>x.id===b.buildId); demand(build,'Choose a variation.');
         await writeFile(path.join(data,`backup-${Date.now()}-${randomUUID()}.json`),JSON.stringify(state,null,2));
         Object.assign(run,metadata,{spaceConfirmed:true});run.context=context; run.buildId=build.id; return run;
@@ -234,10 +234,10 @@ const server = http.createServer(async (req,res)=>{
         const selected=eligible.filter(r=>r.buildId===a.id || r.buildId===c.id);
         demand(new Set(selected.map(r=>r.scope || 'encounter')).size<=1,'These versions mix entire-log and individual encounter evidence. Use a separate encounter label for full-log sessions so like-for-like runs can be compared.');
         const result=compareRuns(eligible.filter(r=>r.buildId===a.id),eligible.filter(r=>r.buildId===c.id));
-        result.random=patrols.find(p=>p.id===metadata.patrolId).random;
+        result.random=patrols.find(p=>p.id===metadata.patrolId)?.random??false;
         if(!result.baseline.count || !result.candidate.count) {
           const labels=build=>[...new Set(state.runs.filter(r=>r.buildId===build.id && r.player.id===b.playerId).map(r=>r.context))].join('; ') || 'no saved runs for this player';
-          result.message=`No matching confirmed runs for one side under “${metadata.context}”. Baseline labels: ${labels(a)}. Candidate labels: ${labels(c)}. Open the ship page and edit older runs to confirm their patrol, difficulty, and Solo / Group.`;
+          result.message=`No matching confirmed runs for one side under “${metadata.context}”. Baseline labels: ${labels(a)}. Candidate labels: ${labels(c)}. Open the ship page and edit older runs to confirm their battle type, mission, difficulty, and Solo / Group.`;
         }
         return json(result);
       }

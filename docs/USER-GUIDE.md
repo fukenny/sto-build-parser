@@ -1,3 +1,7 @@
+## v0.5.5 battle types
+
+Choose Patrol, TFO, or Other when saving, correcting, or comparing runs. Patrol retains its category and mission menus. TFO provides an alphabetical space-mission list; event availability varies. Use Other for DSEs, episodes, or unlisted missions and enter a consistent name. Difficulty and Solo/Group remain required; ground is unsupported. Existing DSE records match under Other, and previously typed TFO names remain available when editing or comparing those records.
+
 ## v0.5.3 design branch: ships, setups and repeated flights
 
 1. In **Shipyard**, add a reference ship name and open its profile. It does not link to STO; select logs from the correct ship yourself.

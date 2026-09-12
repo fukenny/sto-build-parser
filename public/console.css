@@ -1,4 +1,4 @@
-@font-face{font-family:Antonio;src:url('/fonts/Antonio.ttf') format('truetype');font-weight:100 700;font-display:swap}
+@font-face{font-family:Antonio;src:url('/fonts/Antonio.ttf?v=0.5.4') format('truetype');font-weight:100 700;font-display:swap}
 /* Desktop console stays in the viewport; only its workspaces scroll. */
 body.lcars-console{--sidebar:240px;--rail:24px;--gap:10px;--display:Antonio,'Arial Narrow',sans-serif;background:#000;padding:15px;max-width:1800px;margin:auto}
 .console-top{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);grid-template-rows:145px var(--rail);position:relative;overflow:hidden;border-bottom-left-radius:115px;background:var(--bluey)}
@@ -28,3 +28,58 @@ body.lcars-console{--sidebar:240px;--rail:24px;--gap:10px;--display:Antonio,'Ari
 .shipyard-heading-row{display:flex;align-items:center;justify-content:flex-end;gap:28px;flex-wrap:wrap}.shipyard-heading-row label{width:260px;max-width:100%;text-align:left}.workspace-heading{border-bottom:8px solid var(--almond-creme);padding-bottom:18px}.workspace-heading>p{margin:12px 0 0}.lcars-console .nav[data-page="shipyard"]{background:var(--true-mauve)}@media(max-width:720px){.shipyard-heading-row{gap:12px}.shipyard-heading-row label{width:100%}}
 
 .shipyard-heading-row{justify-content:space-between}.shipyard-heading-row h2{margin-left:auto}.archive-filter{margin:20px 0}.archive-filter input,.run-picker{width:auto!important;margin-right:10px}#variation-content details{border-top:8px solid var(--bluey);padding:16px 0;margin:20px 0 25px}#variation-content summary{font:26px Antonio;color:var(--african-violet);cursor:pointer}.variation-actions{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}.loadout-group>button{margin-bottom:20px}#analysis-target{border-left:5px solid var(--orange);padding:12px;margin-bottom:15px}dialog{max-width:520px;width:90%;background:#08060b;color:var(--almond-creme);border:3px solid var(--african-violet);padding:25px}dialog::backdrop{background:#000b}
+
+#detail-compare{margin-block:20px 24px}
+
+/* Horizontal frame colors: warm upper rail and red lower rail. */
+.console-top>.console-rail i{background:var(--almond-creme)}
+.console-top>.console-rail i:first-child,.console-top>.console-rail i:nth-child(3){background:var(--orange)}
+.console-top>.console-rail:after{background:var(--butterscotch)}
+.console-body>.body-rail i,.console-body>.body-rail:after{background:var(--red)}
+
+/* Keep the upper elbow blue to its first break; lower rail is continuous. */
+.console-top>.console-rail i:first-child{background:var(--bluey)}
+.console-body>.body-rail{display:block;background:var(--red)}
+.console-body>.body-rail i,.console-body>.body-rail:after{display:none}
+
+/* 0.5.4.1 approved amber frame; workspace content and controls stay intact. */
+body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444;--lilac:#887537;--almond-creme:#ead49a;--orange:#eca02d;--butterscotch:#ce932d;--red:#bd8e29}
+.console-top{display:flex;align-items:center;gap:8px;flex:0 0 32px;height:32px;border-radius:0;background:#000;overflow:visible}
+.top-ident{width:18px;height:16px;flex:none;border-radius:16px 0 0 16px;background:linear-gradient(90deg,#685719,#c3ac56)}
+.top-content{display:contents}.top-content h2{font:500 23px/1 Antonio;white-space:nowrap;color:#c3ac56;padding:0;margin:0;order:0}
+.console-top>.console-rail{display:block;flex:1;height:16px;background:linear-gradient(#635619,#cfb751,#7e6a22);order:1}
+.console-top>.console-rail i{display:none}.console-top>.console-rail:after{display:none}
+.console-top:after{content:'BUILD BETTER · TEST DELIBERATELY';font:15px Antonio;color:#c3ac56;order:2;white-space:nowrap}
+.console-body{margin-top:7px;border-radius:80px 0 0 0;background:linear-gradient(110deg,#885018,#ed971e 240px,#ffb736 310px);padding-top:0}
+.console-body>.body-rail{display:flex;align-items:flex-start;left:calc(var(--sidebar) + 65px);right:0;clip-path:none;height:44px;background:transparent;gap:8px}
+.console-body>.body-rail:before{content:'';flex:1;height:44px;background:linear-gradient(90deg,#f7de60,#bba548)}
+.console-body>.body-rail:after{display:block;content:'YOUR SHIPYARD';font:44px/1 Antonio;color:#d4b680;background:#000;padding:0 12px;white-space:nowrap;height:44px;border-right:32px solid #d7c15e;border-radius:0 24px 24px 0}
+.lcars-console main{margin-top:84px;border-radius:34px 0 0 0;scrollbar-color:#af883e #000;background:#000}
+.lcars-console .brand{height:84px;min-height:84px;padding:52px 14px 10px;font:17px Antonio;color:#251805;background:transparent}
+.lcars-console .section-label{background:#030302;border:0;height:5px;padding:0;min-height:5px}
+.lcars-console .nav{background:linear-gradient(100deg,#96822c,#ffe352 78%)!important;color:#151005}
+.lcars-console .nav[data-page='settings']{background:linear-gradient(100deg,#a7954c,#fff0a0)!important}
+.lcars-console .nav[data-page='analyze']{background:linear-gradient(100deg,#765118,#efa13c)!important}
+.lcars-console .nav.active{box-shadow:inset -8px 0 #fff8c9}
+.lcars-console .sidebar-spacer{background:linear-gradient(100deg,#665a27,#9d893b)}
+.lcars-console #exit-shakedown{background:linear-gradient(100deg,#806a20,#dcb748);color:#191206}
+.lcars-console .creator-notice,.lcars-console .aside-bottom{background:linear-gradient(100deg,#b6a66c,#e2d29c);color:#29200c}
+.workspace-heading h2{display:none}.workspace-heading{border-color:#8d6826}.workspace-heading span{color:#bdae80}
+@media(max-width:720px){.console-top{flex:none;height:30px}.console-top:after{display:none}.top-content h2{font-size:22px}.console-body{background:#000;border-radius:0}.console-body>.body-rail{position:relative;left:auto;right:auto;height:38px}.console-body>.body-rail:before{height:38px}.console-body>.body-rail:after{font-size:30px;height:38px}.lcars-console .brand{background:linear-gradient(110deg,#885018,#ed971e);height:50px;min-height:50px;padding:16px;border-radius:35px 0 0 0}.lcars-console main{margin-top:0;border-radius:0}}
+
+@media(min-width:721px){.console-body:before{content:'';position:absolute;left:var(--sidebar);right:0;top:44px;height:40px;border-radius:34px 0 0 0;background:#000;pointer-events:none}}
+
+/* Align frame caps and isolate the elbow from the continuous yellow rail. */
+.console-top>.top-ident,.console-top>.console-rail{height:16px;align-self:center;margin-block:0}
+.console-body>.body-rail{left:calc(var(--sidebar) + 65px);background:#000;padding-left:7px;gap:0}
+.console-body>.body-rail:before{background:linear-gradient(90deg,#f7de60,#bba548)}
+.lcars-console main{border-top-left-radius:0}
+@media(max-width:720px){.console-body>.body-rail{left:auto}}
+
+/* Orange headlines; lavender is reserved for workspace actions. */
+.lcars-console h1,.lcars-console h2,.lcars-console h3,.lcars-console h4,.lcars-console h5,.lcars-console h6,.lcars-console .panel h2,.lcars-console #variation-content summary,.lcars-console .body-rail:after{color:var(--orange)}
+.lcars-console main button.primary{background:#baa4e5;color:#171020;border-color:#baa4e5}
+.lcars-console main button:disabled,.lcars-console dialog button:disabled{opacity:.5}
+
+/* Local workspace indicator: a small illuminated green LED. */
+.lcars-console .aside-bottom>.dot{background:#54ef83;box-shadow:0 0 3px #27bd58,0 0 7px #27bd5880;border:1px solid #239947}

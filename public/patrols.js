@@ -12,9 +12,23 @@ export const patrols = Object.entries(groups).flatMap(([category,names])=>names.
  random:/^(Bringers of War|Jupiter Gauntlet|The Ninth Rule)/.test(name)
 })));
 export const difficulties=['Normal','Advanced','Elite'];
+// Space missions from https://sto.fandom.com/wiki/Task_Force_Operation (2026-09-12).
+// Event availability varies; unlisted missions can be saved under Other.
+export const tfos=["Azure Nebula Rescue","Battle at the Binary Stars","Battle of Korfez","Battle of Procyon V","Best Served Cold","Borg Disconnected","Breach","Core Assault","Counterpoint","Crystalline Catastrophe","Cure Found","Days of Doom","Defense of Starbase One","Dranuur Gauntlet","Fleet Alert","Fleet Transport Defense","Gateway to Gre'thor","Gravity Kills","Guillotine","Herald Sphere","Hive Onslaught","Infected: The Conduit","Iuppiter Iratus","Khitomer Vortex","Kobayashi Maru","Mirror Invasion","Operation Riposte","Peril Over Pahvo","Remain Klingon","Resistance of Starbase One","Romulan Imperial Minefield","Starbase Blockade","Starbase Fleet Defense","Storming the Spire","Swarm","Synth Wave","To Hell With Honor","Twin Tribulations","Tzenkethi Front","Undine Assault","Vault: Ensnared","Viscous Cycle"];
+export const battleTypes=['Patrol','TFO','Other'];
+export const battleTypeOf=r=>r.battleType==='DSE'?'Other':r.battleType??'Patrol';
+const missionName=value=>typeof value==='string'?value.trim().replace(/\s+/g,' '):'';
 export function conditions(input) {
+ const battleType=battleTypeOf(input);
+ if(!battleTypes.includes(battleType)||!difficulties.includes(input.difficulty)||!['Solo','Group'].includes(input.party))throw new Error('Choose a battle type, difficulty, and Solo / Group.');
  const patrol=patrols.find(p=>p.id===input.patrolId);
- if(!patrol || !difficulties.includes(input.difficulty) || !['Solo','Group'].includes(input.party)) throw new Error('Choose a listed space patrol, difficulty, and Solo / Group.');
- return {patrolId:patrol.id,difficulty:input.difficulty,party:input.party,context:`${patrol.name} / ${input.difficulty} / ${input.party}`};
+ const mission=battleType==='Patrol'?'':missionName(input.missionName);
+ if(battleType==='Patrol'&&!patrol)throw new Error('Choose a listed space patrol.');
+ if(battleType!=='Patrol'&&(!mission||mission.length>200))throw new Error('Enter a mission name up to 200 characters.');
+ return {battleType,patrolId:battleType==='Patrol'?patrol.id:null,missionName:mission,difficulty:input.difficulty,party:input.party,context:(battleType==='Patrol'?patrol.name:battleType+' / '+mission)+' / '+input.difficulty+' / '+input.party};
 }
-export const conditionKey=r=>r.patrolId ? `${r.patrolId}|${r.difficulty}|${r.party}` : '';
+export const conditionKey=r=>{
+ const type=battleTypeOf(r);
+ const mission=type==='Patrol'?r.patrolId:missionName(r.missionName).toLowerCase();
+ return mission?JSON.stringify([type,mission,r.difficulty,r.party]):'';
+};
