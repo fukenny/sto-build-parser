@@ -1,4 +1,4 @@
-# v0.5.3 — LCARS interface update (design branch)
+# v0.5.3 — LCARS interface update
 
 - Ship → loadout → variation detail with collapsible run history and multiple flights per setup.
 - Compare two matching flights within a variation, or matching runs across variations.
@@ -8,7 +8,7 @@
 - Fixed desktop frame with independent content scrolling.
 - Bottom-aligned Exit and credits, colored sidebar spacer, and varied navigation colors.
 - Ship profiles precede analysis, with clear reference-only naming guidance.
-- Published download remains v0.5.1 until a v0.5.3 release is packaged and published.
+- Windows portable alpha includes Node.js; no separate runtime installation required.
 
 # v0.5.1 — Shutdown fix and security hardening
 
