@@ -1,4 +1,4 @@
-@font-face{font-family:Antonio;src:url('/fonts/Antonio.ttf') format('truetype');font-weight:100 700;font-display:swap}
+@font-face{font-family:Antonio;src:url('/fonts/Antonio.ttf?v=0.5.4') format('truetype');font-weight:100 700;font-display:swap}
 /* Desktop console stays in the viewport; only its workspaces scroll. */
 body.lcars-console{--sidebar:240px;--rail:24px;--gap:10px;--display:Antonio,'Arial Narrow',sans-serif;background:#000;padding:15px;max-width:1800px;margin:auto}
 .console-top{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);grid-template-rows:145px var(--rail);position:relative;overflow:hidden;border-bottom-left-radius:115px;background:var(--bluey)}
@@ -36,3 +36,8 @@ body.lcars-console{--sidebar:240px;--rail:24px;--gap:10px;--display:Antonio,'Ari
 .console-top>.console-rail i:first-child,.console-top>.console-rail i:nth-child(3){background:var(--orange)}
 .console-top>.console-rail:after{background:var(--butterscotch)}
 .console-body>.body-rail i,.console-body>.body-rail:after{background:var(--red)}
+
+/* Keep the upper elbow blue to its first break; lower rail is continuous. */
+.console-top>.console-rail i:first-child{background:var(--bluey)}
+.console-body>.body-rail{display:block;background:var(--red)}
+.console-body>.body-rail i,.console-body>.body-rail:after{display:none}
