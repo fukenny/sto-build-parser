@@ -30,3 +30,9 @@ body.lcars-console{--sidebar:240px;--rail:24px;--gap:10px;--display:Antonio,'Ari
 .shipyard-heading-row{justify-content:space-between}.shipyard-heading-row h2{margin-left:auto}.archive-filter{margin:20px 0}.archive-filter input,.run-picker{width:auto!important;margin-right:10px}#variation-content details{border-top:8px solid var(--bluey);padding:16px 0;margin:20px 0 25px}#variation-content summary{font:26px Antonio;color:var(--african-violet);cursor:pointer}.variation-actions{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}.loadout-group>button{margin-bottom:20px}#analysis-target{border-left:5px solid var(--orange);padding:12px;margin-bottom:15px}dialog{max-width:520px;width:90%;background:#08060b;color:var(--almond-creme);border:3px solid var(--african-violet);padding:25px}dialog::backdrop{background:#000b}
 
 #detail-compare{margin-block:20px 24px}
+
+/* Horizontal frame colors: warm upper rail and red lower rail. */
+.console-top>.console-rail i{background:var(--almond-creme)}
+.console-top>.console-rail i:first-child,.console-top>.console-rail i:nth-child(3){background:var(--orange)}
+.console-top>.console-rail:after{background:var(--butterscotch)}
+.console-body>.body-rail i,.console-body>.body-rail:after{background:var(--red)}
