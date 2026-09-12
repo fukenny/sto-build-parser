@@ -114,3 +114,6 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 .lcars-console main{padding-top:12.5px}
 .workspace-selector{padding-bottom:12.5px}
 @media(max-width:720px){.lcars-console main{padding-top:12px}.workspace-selector{padding-bottom:12px}}
+
+/* Header-to-selector gap: halve the full gap, not just main's padding. */
+@media(min-width:721px){.lcars-console main{margin-top:46px}.workspace-selector{padding-bottom:38px}}
