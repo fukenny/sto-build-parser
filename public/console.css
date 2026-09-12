@@ -78,5 +78,5 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 
 /* Orange headlines; lavender is reserved for workspace actions. */
 .lcars-console h1,.lcars-console h2,.lcars-console h3,.lcars-console h4,.lcars-console h5,.lcars-console h6,.lcars-console .panel h2,.lcars-console #variation-content summary,.lcars-console .body-rail:after{color:var(--orange)}
-.lcars-console main button,.lcars-console dialog button{background:#baa4e5;color:#171020;border-color:#baa4e5}
+.lcars-console main button.primary{background:#baa4e5;color:#171020;border-color:#baa4e5}
 .lcars-console main button:disabled,.lcars-console dialog button:disabled{opacity:.5}
