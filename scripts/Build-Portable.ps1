@@ -24,6 +24,7 @@ $nodeExtracted = Join-Path $buildRoot "node\node-v$NodeVersion-win-x64"
 Copy-Item -LiteralPath (Join-Path $nodeExtracted 'node.exe') -Destination $runtime
 Copy-Item -LiteralPath (Join-Path $nodeExtracted 'LICENSE') -Destination $runtime
 "Node.js $NodeVersion win-x64`nOfficial source: https://nodejs.org/dist/v$NodeVersion/$nodeName`nSHA256: $($expected.Split(' ')[0])" | Set-Content -LiteralPath (Join-Path $runtime 'PROVENANCE.txt')
+& (Join-Path $PSScriptRoot 'Build-Launcher.ps1') -OutputDirectory $stage
 $output = Join-Path (Split-Path $projectRoot -Parent) "sto-shakedown-v$version-windows-x64.zip"
 Compress-Archive -LiteralPath $stage -DestinationPath $output -Force
 Write-Output "Portable archive: $output"

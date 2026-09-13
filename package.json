@@ -1,6 +1,6 @@
 {
   "name": "sto-shakedown",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Local STO build experiments grounded in combat logs",
