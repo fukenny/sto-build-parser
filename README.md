@@ -4,10 +4,10 @@ Test your Star Trek Online ship builds using space-patrol combat logs.
 
 [Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
-## New in v0.5.6.2
+## New in v0.5.7
 
-- Combat Details: observed accuracy, misses, critical/flanking rates and damage, and largest hit per source. Analyze logs again to populate new statistics.
-- Ship pills, renaming, and consistent LCARS styling throughout the workspaces.
+- Run Briefing in Analyze a Run: top contributors, pet report, biggest hit, pressure chart, and hit statistics above the detailed evidence tables.
+- Pressure chart highlights the highest 10% of nonzero bars in red and lowest 10% in yellow, with ties included. Highlighting is disabled for fewer than ten active bars or tied thresholds.
 
 The Windows alpha includes the amber LCARS frame, orange headlines, and Patrol / TFO / Other battle selection. TFO offers 42 space missions; Other accepts a mission name for DSEs, episodes, or unlisted encounters.
 
@@ -21,7 +21,7 @@ See the [updated user guide](docs/USER-GUIDE.md) for the full workflow.
 
 ## Download for Windows
 
-### [Download STO Shakedown v0.5.6.2 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.6.2/sto-shakedown-v0.5.6.2-windows-x64.zip)
+### [Download STO Shakedown v0.5.7 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.7/sto-shakedown-v0.5.7-windows-x64.zip)
 
 **Free fan-project preview · Windows x64 · No Node, npm, or Codex installation needed.**
 

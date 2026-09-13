@@ -1,3 +1,10 @@
+# v0.5.7 — Run Briefing
+
+- Add an analysis dashboard with real run totals, top weapon/ability contributors, leading pet source, biggest non-shield hit and hit statistics.
+- Preserve detailed evidence below the briefing and add Change combat / Save run jump controls.
+- Highlight incoming-damage extremes with red/yellow percentile bands and explanatory labels.
+- Keep the existing navigation, header and ship selector.
+
 # v0.5.6.2 — Shipyard polish and Combat Details
 
 - Add hit accuracy, misses, critical/flanking counts, rates and damage, and largest non-shield hit to Analyze a Run. Parser version 3; existing saved runs remain unchanged.

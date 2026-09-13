@@ -204,3 +204,34 @@ body.lcars-console{--african-violet:#e5c36e;--bluey:#e3bf4c;--true-mauve:#be9444
 .lcars-console #analyze .metric{border-top-left-radius:24px}
 .lcars-console #analyze .selection-guide{border-bottom-left-radius:36px 28px}
 @media(max-width:720px){.lcars-console #analyze .panel{border-radius:44px 0 0 44px / 34px 0 0 30px}.lcars-console #analyze>.page-title+.panel{border-radius:56px 0 0 56px / 34px 0 0 30px}}
+.lcars-console #pressure-chart .pressure-high{background:#f06464}
+.lcars-console #pressure-chart .pressure-low{background:#ffe352}
+.lcars-console #pressure-chart .pressure-normal{background:#baa4e5}
+.lcars-console #pressure-chart .pressure-zero{background:#555}
+
+/* Run briefing lives inside analysis; the application frame is unchanged. */
+#run-briefing{margin-top:28px}
+.briefing-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.lcars-console #briefing-title{font:500 40px/1.2 var(--display);margin:0}
+#briefing-context{margin:10px 0 0;overflow-wrap:anywhere}
+.briefing-actions{display:flex;gap:8px;flex-wrap:wrap}
+.lcars-console #run-briefing .metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.briefing-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:6px;margin-bottom:6px}
+.briefing-card{border:1px solid #d6aa46;border-left:24px solid #d6aa46;border-radius:36px 12px 12px 36px;padding:18px 22px;min-width:0}
+.briefing-card h3{margin:0 0 18px;padding-bottom:10px;border-bottom:2px solid #7e6229}
+.briefing-card h3:not(:first-child){margin-top:24px}
+.briefing-card p{font-size:13px;color:var(--muted)}
+.briefing-contributor{display:grid;grid-template-columns:minmax(100px,1fr) minmax(50px,1.1fr) auto;align-items:center;gap:14px;margin:18px 0}
+.briefing-contributor small,.briefing-highlight small{display:block;font-size:12px;color:var(--muted)}
+.briefing-track{height:22px;background:#191321}
+.briefing-track i{display:block;height:100%;background:#baa4e5}
+.briefing-highlight{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.briefing-highlight strong{font:500 36px/1.2 var(--display);color:var(--orange)}
+#briefing-pressure{margin-top:16px}
+#briefing-pressure .pressure-high{background:#f06464}
+#briefing-pressure .pressure-low{background:#ffe352}
+#briefing-pressure .pressure-normal{background:#baa4e5}
+#briefing-pressure .pressure-zero{background:#555}
+.briefing-evidence{border-left:24px solid #d6aa46;border-bottom:6px solid #d6aa46;border-radius:0 0 0 28px;padding:12px 20px;margin:20px 0 0}
+@media(max-width:1100px){.briefing-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.lcars-console #run-briefing .metrics{grid-template-columns:1fr}.briefing-card{border-left-width:14px;padding:16px 14px}.briefing-contributor{grid-template-columns:minmax(0,1fr) auto;gap:8px}.briefing-track{grid-column:1;grid-row:auto}.briefing-contributor strong{grid-column:2;grid-row:2}.briefing-contributor>div:first-child{grid-column:1/-1}}
