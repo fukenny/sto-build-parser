@@ -28,3 +28,18 @@ test('comparison shows sample count and does not invent significance',()=>{
   const r=compareRuns([run(100),run(200)],[run(180)]);assert.equal(r.baseline.mean,150);assert.ok(Math.abs(r.delta-20)<1e-10);assert.match(r.message,/Early observation/);assert.equal(compareRuns([],[]).delta,null);
   assert.equal(compareRuns([run(100)],[]).delta,null);
 });
+
+test('combat details separate misses, overlapping crit/flank damage, shield records and pet sources',()=>{
+ const p=createParser();const t='26:09:07:08:00:00.0';
+ p.add(line(t,'Beam','Phaser',100,0,{flags:'Critical|Flank'}));
+ p.add(line(t,'Beam','Shield',-30,-40,{flags:'Critical|Flank'}));
+ p.add(line(t,'Beam','Phaser',50));
+ p.add(line(t,'Beam','Phaser',0,0,{flags:'Miss'}));
+ p.add(line(t,'Beam','Phaser',70,0,{pet:'Valkyrie',flags:'Flank'}));
+ p.add(line(t,'Heal','HitPoints',-80,0,{flags:'Critical'}));
+ const r=p.finish();assert.equal(r.parserVersion,3);
+ const a=r.encounters[0].players[0].abilities.find(a=>!a.pet);
+ assert.equal(a.hullHits,2);assert.equal(a.misses,1);assert.equal(a.criticalHits,1);assert.equal(a.flankHits,1);
+ assert.equal(a.criticalDamage,100);assert.equal(a.flankDamage,100);assert.equal(a.maxHit,100);assert.equal(a.total,180);
+ const pet=r.encounters[0].players[0].abilities.find(a=>a.pet);assert.equal(pet.flankHits,1);assert.equal(pet.flankDamage,70);
+});

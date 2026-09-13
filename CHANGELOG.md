@@ -1,4 +1,8 @@
-# v0.5.6 — In development
+# v0.5.6.2 — Shipyard polish and Combat Details
+
+- Add hit accuracy, misses, critical/flanking counts, rates and damage, and largest non-shield hit to Analyze a Run. Parser version 3; existing saved runs remain unchanged.
+- Add ship selection pills, ship detail panes, framed variation cards and consistent LCARS workspaces.
+- Fix frame overlap, font fallbacks and spacing; update examples to USS Elston.
 
 - Rename ships from Your Ships while preserving loadouts, variations and runs.
 - Scroll and focus the run correction editor when opened.

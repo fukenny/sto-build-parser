@@ -4,7 +4,10 @@ Test your Star Trek Online ship builds using space-patrol combat logs.
 
 [Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
-## New in v0.5.5
+## New in v0.5.6.2
+
+- Combat Details: observed accuracy, misses, critical/flanking rates and damage, and largest hit per source. Analyze logs again to populate new statistics.
+- Ship pills, renaming, and consistent LCARS styling throughout the workspaces.
 
 The Windows alpha includes the amber LCARS frame, orange headlines, and Patrol / TFO / Other battle selection. TFO offers 42 space missions; Other accepts a mission name for DSEs, episodes, or unlisted encounters.
 
@@ -18,7 +21,7 @@ See the [updated user guide](docs/USER-GUIDE.md) for the full workflow.
 
 ## Download for Windows
 
-### [Download STO Shakedown v0.5.5 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.5/sto-shakedown-v0.5.5-windows-x64.zip)
+### [Download STO Shakedown v0.5.6.2 — Windows portable ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.5.6.2/sto-shakedown-v0.5.6.2-windows-x64.zip)
 
 **Free fan-project preview · Windows x64 · No Node, npm, or Codex installation needed.**
 
@@ -79,7 +82,7 @@ GitHub's automatic **source-code ZIP** is for developers and requires Node 22+. 
 6. Save additional unchanged runs to the same variation. Create a new variation only when you change equipment.
 7. Compare baseline and candidate under the same character and conditions. Several runs help reveal normal variation; one DPS increase is not proof.
 
-Example: **Milwaukee → Beam Broadside → Baseline / Elite Valkyrie test**, with several runs per variation. Saved runs can be relabeled or moved using **Edit label / version**. Missing comparison evidence displays the available labels rather than inventing zero damage.
+Example: **USS Elston → Beam Broadside → Baseline / Elite Valkyrie test**, with several runs per variation. Saved runs can be relabeled or moved using **Edit label / version**. Missing comparison evidence displays the available labels rather than inventing zero damage.
 
 [Quick start](START-HERE.txt) · [User guide](docs/USER-GUIDE.md) · [Metrics](docs/METRICS.md) · [Changelog](CHANGELOG.md) · [Development](docs/DEVELOPMENT.md)
 

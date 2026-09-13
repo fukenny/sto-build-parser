@@ -59,8 +59,8 @@ label or move a run to the right variation without importing it again.
 A backup is kept before corrections and the first workspace migration.
 
 EXAMPLE
-Milwaukee > Beam Broadside > Baseline: three unchanged runs.
-Milwaukee > Beam Broadside > Elite Valkyrie: three runs after swapping pets.
+USS Elston > Beam Broadside > Baseline: three unchanged runs.
+USS Elston > Beam Broadside > Elite Valkyrie: three runs after swapping pets.
 A different build concept, such as Torpedoes, gets a different loadout.
 
 LIMITS
