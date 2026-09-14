@@ -37,7 +37,7 @@ test('combat details separate misses, overlapping crit/flank damage, shield reco
  p.add(line(t,'Beam','Phaser',0,0,{flags:'Miss'}));
  p.add(line(t,'Beam','Phaser',70,0,{pet:'Valkyrie',flags:'Flank'}));
  p.add(line(t,'Heal','HitPoints',-80,0,{flags:'Critical'}));
- const r=p.finish();assert.equal(r.parserVersion,3);
+  const r=p.finish();assert.equal(r.parserVersion,4);
  const a=r.encounters[0].players[0].abilities.find(a=>!a.pet);
  assert.equal(a.hullHits,2);assert.equal(a.misses,1);assert.equal(a.criticalHits,1);assert.equal(a.flankHits,1);
  assert.equal(a.criticalDamage,100);assert.equal(a.flankDamage,100);assert.equal(a.maxHit,100);assert.equal(a.total,180);
