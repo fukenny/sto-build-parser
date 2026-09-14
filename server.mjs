@@ -7,6 +7,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {parseIsolated,stopParsers} from './lib/isolated-parser.mjs';
 import {createStore} from './lib/store.mjs';
+import {pickDesktopFolder} from './lib/desktop-picker.mjs';
 import {compareRuns} from './lib/comparison.mjs';
 import {conditions,conditionKey,patrols} from './public/patrols.js';
 
@@ -114,6 +115,9 @@ const server = http.createServer(async (req,res)=>{
         demand(process.platform === 'win32','Paste your folder path instead.');
         demand(!picking,'A folder picker is already open.'); picking=true;
         try {
+          if(process.env.STO_DESKTOP==='1' && process.connected) {
+            return json({folder:await pickDesktopFolder(store.state.folder)});
+          }
           const script = "Add-Type -AssemblyName System.Windows.Forms; $picker = New-Object System.Windows.Forms.FolderBrowserDialog; $picker.Description = 'Select the STO GameClient combat log folder'; $picker.ShowNewFolderButton = $false; if ($picker.ShowDialog() -eq 'OK') { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write($picker.SelectedPath) }; $picker.Dispose()";
           const pending=promisify(execFile)('powershell.exe',['-NoProfile','-STA','-Command',script],{windowsHide:true,timeout:120000});
           pickerChild=pending.child;

@@ -16,7 +16,22 @@ function fail(error){dialog.showErrorBox('STO Shakedown',String(error.message||e
 async function start(){
  session.defaultSession.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
  session.defaultSession.setPermissionCheckHandler(()=>false);
- backend=fork(path.join(root,'server.mjs'),[],{execPath:path.join(root,'runtime','node.exe'),cwd:root,windowsHide:true,silent:true,env:{...process.env,PORT:'0',STO_DATA_DIR:path.join(home,'data')}});
+ backend=fork(path.join(root,'server.mjs'),[],{execPath:path.join(root,'runtime','node.exe'),cwd:root,windowsHide:true,silent:true,env:{...process.env,PORT:'0',STO_DESKTOP:'1',STO_DATA_DIR:path.join(home,'data')}});
+ let selectingFolder=false;
+ backend.on('message',async message=>{
+  if(message?.type!=='desktop-pick-folder'||typeof message.id!=='string')return;
+  const reply=value=>{if(backend.connected)backend.send({type:'desktop-folder-result',id:message.id,...value},()=>{});};
+  if(selectingFolder||stopping||!window||window.isDestroyed()){reply({error:true});return;}
+  selectingFolder=true;
+  try {
+   const result=await dialog.showOpenDialog(window,{
+    title:'Select the STO GameClient combat-log folder',buttonLabel:'Select folder',
+    defaultPath:typeof message.defaultPath==='string'&&message.defaultPath?message.defaultPath:app.getPath('documents'),
+    properties:['openDirectory','dontAddToRecent']
+   });
+   reply({folder:result.canceled?'':result.filePaths[0]||''});
+  }catch{reply({error:true});}finally{selectingFolder=false;}
+ });
  let output='', errors='';
  const timer=setTimeout(()=>fail(new Error('The local server did not start. Check that this ZIP was fully extracted into a writable folder.')),30000);
  backend.stderr.on('data',b=>{if(errors.length<8000)errors+=b;});
