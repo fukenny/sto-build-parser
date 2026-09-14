@@ -4,6 +4,18 @@ Test your Star Trek Online ship builds using space-patrol combat logs.
 
 [Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
+## v0.6.0 desktop tester preview
+
+[Download the Electron Windows x64 tester build](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.0).
+
+Shakedown now opens in its own desktop window. Extract the entire ZIP to a writable folder and launch **Shakedown.exe**; no separate Node installation is needed. This is an **unsigned portable tester build**, not an installer. The v0.5.7 browser download below remains available.
+
+Before moving your data, close the old app and back up its `data` folder. Copy that folder beside the new `Shakedown.exe`. Keep the original backup. Closing the desktop window shuts down the local backend; saved data stays beside the EXE.
+
+All 21 automated tests and the exercised Electron isolation, API authorization, navigation, saved-data, and renderer-crash checks passed. Remaining startup/shutdown edge cases and untested scenarios are documented in the [security check report](docs/SECURITY-CHECK-0.6.0.md). These internal checks are not a security certification.
+
+[Desktop testing instructions](docs/ELECTRON-TESTING.md).
+
 ## New in v0.5.7
 
 - Run Briefing in Analyze a Run: top contributors, pet report, biggest hit, pressure chart, and hit statistics above the detailed evidence tables.
