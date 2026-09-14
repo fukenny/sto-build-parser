@@ -252,10 +252,24 @@ function renderBriefing(player, encounter) {
  $('briefing-pets').innerHTML=best?`<div class="briefing-highlight"><span>${esc(best[0])}</span><strong>${compact(best[1])}</strong></div><p>Largest pet contribution this run. Names are as recorded in the log.</p>`:'<p>No owned pet damage recorded.</p>';
  const hit=[...player.abilities].filter(a=>Number.isFinite(a.maxHit)&&a.hullHits>0).sort((a,b)=>b.maxHit-a.maxHit)[0];
  $('briefing-hit').innerHTML=hit?`<div class="briefing-highlight"><strong>${num(hit.maxHit)}</strong><span>${esc(hit.name)}<small>${esc(hit.source)}</small></span></div><p>Largest non-shield damage record.</p>`:'<p>No non-shield hit details available.</p>';
- const chart=$('pressure-chart');
- $('briefing-pressure').innerHTML=player.survival?chart.innerHTML:'No incoming damage details available.';
- $('briefing-pressure').setAttribute('aria-label',player.survival?chart.getAttribute('aria-label'):'No incoming damage details available');
- $('briefing-pressure-note').textContent=player.survival?`Each bar covers ${Math.max(1,Math.ceil((encounter.duration+1)/80))}s. Peak one-second damage: ${num(player.survival.peakSecond.damage)} at +${player.survival.peakSecond.second}s. ${$('pressure-legend').textContent}`:'Analyze this log again to calculate incoming damage.';
+ const chart=$('briefing-pressure'),timeline=player.timeline;
+ if(!Array.isArray(timeline)) {
+  chart.textContent='No outgoing damage details available.';
+  chart.setAttribute('aria-label','No outgoing damage details available');
+  $('briefing-pressure-note').textContent='Analyze this log again to calculate outgoing damage.';
+ } else {
+  const width=Math.max(1,Math.ceil((encounter.duration+1)/80));
+  const bins=Array.from({length:Math.ceil((encounter.duration+1)/width)},()=>0);
+  for(const point of timeline)bins[Math.min(bins.length-1,Math.floor(point.second/width))]+=point.damage;
+  const peak=Math.max(1,...bins),active=bins.filter(d=>d>0).sort((a,b)=>a-b),tail=Math.max(1,Math.ceil(active.length*.1));
+  const low=active[tail-1],high=active[active.length-tail];
+  const band=d=>d===0?'zero':active.length<10||low===high?'normal':d>=high?'high':d<=low?'low':'normal';
+  const peakSecond=timeline.reduce((best,p)=>p.damage>best.damage?p:best,{second:0,damage:0});
+  chart.innerHTML=bins.map((damage,i)=>`<div class="pressure-bar pressure-${band(damage)}" tabindex="0" style="height:${Math.max(2,100*damage/peak)}%" title="+${i*width}–${(i+1)*width}s: ${num(damage)} outgoing damage" aria-label="${i*width} to ${(i+1)*width} seconds: ${num(damage)} outgoing damage"></div>`).join('');
+  chart.setAttribute('aria-label',`Outgoing hull and shield damage, including owned pets, over ${encounter.duration.toFixed(1)} seconds.`);
+  const legend=active.length<10?'Fewer than 10 nonzero bars: percentile highlighting is off.':low===high?'Damage values are tied: percentile highlighting is off.':'Red: highest 10% · Yellow: lowest 10% · Lavender: middle range · Gray: no damage. Ranked within this run’s nonzero bars; ties included.';
+  $('briefing-pressure-note').textContent=`Each bar covers ${width}s. Outgoing hull + shield damage includes owned pets and summons. Peak one-second damage: ${num(peakSecond.damage)} at +${peakSecond.second}s. ${legend}`;
+ }
  $('briefing-rates').innerHTML=$('combat-detail-metrics').innerHTML;
 }
 $('briefing-change').onclick=()=>{$('encounter').scrollIntoView({block:'center',behavior:'smooth'});$('encounter').focus({preventScroll:true});};
