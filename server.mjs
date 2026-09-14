@@ -51,7 +51,10 @@ async function shutdown() {
   await store.drain();
   server.closeAllConnections();
   console.log('STO Shakedown stopped.');
+  if(process.connected)process.disconnect();
 }
+process.on('message',message=>{if(message?.type==='desktop-shutdown')void shutdown();});
+process.on('disconnect',()=>void shutdown());
 process.on('SIGINT',shutdown);
 process.on('SIGTERM',shutdown);
 function demand(condition, message) { if(!condition) throw new Error(message); }

@@ -2,6 +2,7 @@
   "name": "sto-shakedown",
   "version": "0.6.0",
   "private": true,
+  "main": "launcher/electron.cjs",
   "type": "module",
   "description": "Local STO build experiments grounded in combat logs",
   "scripts": {
@@ -10,5 +11,8 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "electron": "44.3.0"
   }
 }
