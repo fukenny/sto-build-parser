@@ -118,8 +118,8 @@ const server = http.createServer(async (req,res)=>{
           if(process.env.STO_DESKTOP==='1' && process.connected) {
             return json({folder:await pickDesktopFolder(store.state.folder)});
           }
-          const script = "Add-Type -AssemblyName System.Windows.Forms; $picker = New-Object System.Windows.Forms.FolderBrowserDialog; $picker.Description = 'Select the STO GameClient combat log folder'; $picker.ShowNewFolderButton = $false; if ($picker.ShowDialog() -eq 'OK') { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write($picker.SelectedPath) }; $picker.Dispose()";
-          const pending=promisify(execFile)('powershell.exe',['-NoProfile','-STA','-Command',script],{windowsHide:true,timeout:120000});
+          const script = "Add-Type -AssemblyName System.Windows.Forms; $picker = New-Object System.Windows.Forms.OpenFileDialog; $picker.AutoUpgradeEnabled = $true; $picker.Title = 'Select a combat log to use its folder'; $picker.Filter = 'Combat logs (combatlog*.log)|combatlog*.log|Log files (*.log)|*.log'; $picker.Multiselect = $false; $picker.CheckFileExists = $true; if (Test-Path -LiteralPath $env:STO_PICKER_FOLDER -PathType Container) { $picker.InitialDirectory = $env:STO_PICKER_FOLDER }; try { if ($picker.ShowDialog() -eq 'OK') { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [Console]::Write([System.IO.Path]::GetDirectoryName($picker.FileName)) } } finally { $picker.Dispose() }";
+          const pending=promisify(execFile)('powershell.exe',['-NoProfile','-STA','-Command',script],{windowsHide:true,timeout:120000,env:{...process.env,STO_PICKER_FOLDER:store.state.folder||process.env.USERPROFILE||''}});
           pickerChild=pending.child;
           const result=await pending;
           return json({folder:result.stdout.trim()});

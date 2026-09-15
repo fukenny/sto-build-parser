@@ -25,11 +25,11 @@ async function start(){
   selectingFolder=true;
   try {
    const result=await dialog.showOpenDialog(window,{
-    title:'Select the STO GameClient combat-log folder',buttonLabel:'Select folder',
+    title:'Select a combat log to use its folder',buttonLabel:'Use this log folder',
     defaultPath:typeof message.defaultPath==='string'&&message.defaultPath?message.defaultPath:app.getPath('documents'),
-    properties:['openDirectory','dontAddToRecent']
+    properties:['openFile','dontAddToRecent'],filters:[{name:'Combat logs',extensions:['log']}]
    });
-   reply({folder:result.canceled?'':result.filePaths[0]||''});
+   reply({folder:result.canceled||!result.filePaths[0]?'':path.dirname(result.filePaths[0])});
   }catch{reply({error:true});}finally{selectingFolder=false;}
  });
  let output='', errors='';
