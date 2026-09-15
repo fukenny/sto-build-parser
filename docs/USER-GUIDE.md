@@ -28,7 +28,7 @@ Comparison now includes mean damage and encounter DPS by weapon/ability and comb
 The app does not automatically detect ground records or prove mission completeness. Import only space-patrol selections and confirm them yourself. Random enemies and group composition may affect results.
 
 STO SHAKEDOWN v0.4.0 - QUICK START
-Created by Kenneth Solans
+Created by Solans Labs
 
 1. Extract the complete Windows x64 portable ZIP into a writable folder.
    Double-click Start.cmd. It includes Node and opens your existing browser.
@@ -81,7 +81,7 @@ GitHub's source-code ZIP does not contain the bundled Node runtime.
 
 Independent fan project, not affiliated with or endorsed by Cryptic Studios
 or the owners of Star Trek. Related marks belong to their owners.
-Please preserve Kenneth Solans' creator credit; do not claim this as your own.
+Please preserve the Solans Labs creator credit; do not claim this as your own.
 More: docs/USER-GUIDE.md, docs/METRICS.md, CHANGELOG.md.
 
 

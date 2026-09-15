@@ -86,7 +86,7 @@ The app does not automatically detect ground records or prove mission completene
 
 ## About STO Shakedown
 
-A local Windows combat parser for testing STO ship builds through damage and survivability. Created by Kenneth Solans, with an LCARS-inspired interface and an independent [fan-project notice](COPYRIGHT.md).
+A local Windows combat parser for testing STO ship builds through damage and survivability. Created by Solans Labs, with an LCARS-inspired interface and an independent [fan-project notice](COPYRIGHT.md).
 
 ## Start without installing software
 
