@@ -1,3 +1,16 @@
+# v0.6.3 — Easier analysis and backups
+
+- Sort tables while keeping expanded details attached to their rows.
+- Open the data folder and create separate saved-state backups from Log folder settings.
+- Fix missing-runtime exit handling and bound unresponsive backend shutdown.
+- Include 0.6.1/0.6.2 drilldowns, consolidated combat details, outgoing damage chart and Explorer-style log selection.
+- See [full notes and update instructions](docs/RELEASE-0.6.3.md).
+
+# v0.6.0 — Electron desktop
+
+- Standalone desktop window with bundled Electron and Node, portable data beside the EXE, and graceful close.
+- See [release notes](docs/RELEASE-0.6.0.md).
+
 # v0.5.7 — Run Briefing
 
 - Add an analysis dashboard with real run totals, top weapon/ability contributors, leading pet source, biggest non-shield hit and hit statistics.

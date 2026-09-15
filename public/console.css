@@ -251,3 +251,9 @@ main .damage-inset th[scope="row"]{font:inherit;text-transform:none;letter-spaci
 
 main .damage-toggle{font:500 24px/1.3 var(--display);color:var(--text);text-align:left;white-space:normal}
 main .damage-inset th[scope="row"]{font:500 20px/1.3 var(--display)}
+
+main table th .table-sort{background:transparent;border:0;border-radius:0;padding:0;color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;text-align:inherit;min-height:30px}
+main table th[aria-sort="ascending"] .table-sort::after{content:' ▲'}
+main table th[aria-sort="descending"] .table-sort::after{content:' ▼'}
+main table .table-sort:focus-visible{outline:2px solid #baa4e5;outline-offset:4px}
+#backup-result{overflow-wrap:anywhere}

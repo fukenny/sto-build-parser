@@ -7,7 +7,8 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {parseIsolated,stopParsers} from './lib/isolated-parser.mjs';
 import {createStore} from './lib/store.mjs';
-import {pickDesktopFolder} from './lib/desktop-picker.mjs';
+import {pickDesktopFolder,desktopRequest} from './lib/desktop-picker.mjs';
+import {backupState} from './lib/backup.mjs';
 import {compareRuns} from './lib/comparison.mjs';
 import {conditions,conditionKey,patrols} from './public/patrols.js';
 
@@ -101,6 +102,11 @@ const server = http.createServer(async (req,res)=>{
       demand(req.method === 'POST', 'Unsupported request.');
       const b = await body(req);
       demand(!stopping,'Shakedown is shutting down.');
+      if(url.pathname==='/api/backup')return json({folder:await backupState(store.state,data)});
+      if(url.pathname==='/api/open-data') {
+        demand(process.env.STO_DESKTOP==='1'&&process.connected,'Data folder: '+data);
+        await desktopRequest('desktop-open-data');return json({folder:data});
+      }
       if(url.pathname==='/api/shutdown') {
         json({stopped:true});void shutdown();return;
       }
@@ -269,7 +275,7 @@ const server = http.createServer(async (req,res)=>{
       res.writeHead(200,{'Content-Type':'font/ttf','Cache-Control':'public, max-age=86400'});
       return res.end(await readFile(path.join(root,'public/fonts/Antonio.ttf')));
     }
-    const assets={'/':'index.html','/app.js':'app.js','/drilldown.js':'drilldown.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
+    const assets={'/':'index.html','/app.js':'app.js','/table-sort.js':'table-sort.js','/drilldown.js':'drilldown.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
     if(url.pathname==='/') content=content.replaceAll('__VERSION__',version);

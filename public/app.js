@@ -1,3 +1,5 @@
+import {enableTableSorting} from './table-sort.js';
+enableTableSorting(document.querySelector('main'));
 import {damageRows,bindDamageRows,sourceRows,comparisonRows} from './drilldown.js';
 import {patrols,difficulties,battleTypes,tfos,battleTypeOf} from './patrols.js';
 const $ = id => document.getElementById(id);
@@ -272,3 +274,6 @@ function renderBriefing(player, encounter) {
 }
 $('briefing-change').onclick=()=>{$('encounter').scrollIntoView({block:'center',behavior:'smooth'});$('encounter').focus({preventScroll:true});};
 $('briefing-save').onclick=()=>{$('save-section').scrollIntoView({block:'start',behavior:'smooth'});$('save-build').focus({preventScroll:true});};
+
+action('open-data',async()=>{await api('open-data',{});notice('Data folder opened.');});
+action('backup-data',async()=>{const result=await api('backup',{});$('backup-result').textContent='Backup saved: '+result.folder;notice('Backup complete. Copy this backup to another drive for additional protection.');});
