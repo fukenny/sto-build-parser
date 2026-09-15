@@ -1,6 +1,16 @@
 # STO Shakedown
 
-## Current release: v0.6.0 — Electron desktop
+## Current release: v0.6.3
+
+[Download the Windows desktop ZIP and read the release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.3).
+
+Sortable tables, expandable combat evidence, an outgoing-damage chart, Explorer-style log selection, and **Open data folder / Back up saved data** controls. Startup and shutdown error handling is improved. The existing LCARS frame is unchanged.
+
+Extract the entire ZIP and launch **Shakedown.exe**. Before updating, close the old app and back up and copy its `data` folder beside the new EXE. This is an unsigned portable Windows x64 app, not an installer. No separate Node installation is needed.
+
+[Full 0.6.3 notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.3) · [Version history](CHANGELOG.md)
+
+## Previous release: v0.6.0 — Electron desktop
 
 [Download v0.6.0 and read the release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.0) · [Version history](CHANGELOG.md)
 
