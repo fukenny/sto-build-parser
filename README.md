@@ -1,5 +1,14 @@
 # STO Shakedown
 
+## Current release: v0.6.0 — Electron desktop
+
+[Download v0.6.0 and read the release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.0) · [Version history](CHANGELOG.md)
+
+Shakedown now opens in its own desktop window. Extract the Windows x64 ZIP and launch **Shakedown.exe**. No separate runtime installation is needed. This is an unsigned portable app, not an installer.
+
+Close the previous app, back up its **data** folder, and copy that folder beside the new EXE before starting. See the release notes for completed checks and remaining limitations. The older v0.5.7 browser download below remains available.
+
+
 Test your Star Trek Online ship builds using space-patrol combat logs.
 
 [Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
