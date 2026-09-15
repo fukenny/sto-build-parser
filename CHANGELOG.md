@@ -1,3 +1,13 @@
+# v0.6.0 — Electron desktop
+
+- Opens in its own desktop window, with the existing LCARS interface and analysis workflow.
+- Windows x64 portable ZIP includes Electron and Node; launch Shakedown.exe after extracting all files.
+- Saved data lives in the data folder beside the EXE. Back up and copy your previous data folder before switching versions.
+- Window close shuts down the backend; a second launch focuses the existing window.
+- 21 automated tests passed, plus packaged-app isolation, access-control, navigation and saved-data checks. This unsigned build has documented remaining security and reliability work.
+
+[Download and full release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.0).
+
 # v0.5.5 — Amber LCARS and battle types
 
 - Amber LCARS frame, orange headlines, selective lavender actions and green workspace indicator.
