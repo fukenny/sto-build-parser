@@ -1,3 +1,11 @@
+# v0.6.3 — Easier analysis and backups
+
+- Sort tables while keeping expanded details attached to their rows.
+- Open the data folder and create separate saved-state backups from Log folder settings.
+- Fix missing-runtime exit handling and bound unresponsive backend shutdown.
+- Include 0.6.1/0.6.2 drilldowns, consolidated combat details, outgoing damage chart and Explorer-style log selection.
+- See [full notes and update instructions](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.3).
+
 # v0.6.0 — Electron desktop
 
 - Opens in its own desktop window, with the existing LCARS interface and analysis workflow.
