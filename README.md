@@ -1,12 +1,12 @@
 # STO Shakedown
 
-## Release candidate: v0.6.4.6
+## Release candidate: v0.6.5
 
 The **Color Theme** LCARS panel between **Compare Builds** and **Exit Shakedown** opens a panel to the right over the page content, offering Shakedown (the earlier amber palette), Lower Decks, TNG, and Voyager. Selecting a theme applies it and closes the choices. The choice is saved in local app settings. Existing amber selections remain on Lower Decks. The desktop window and EXE use the supplied STO Shakedown icon. Layout and fonts remain the same; chart warning colors and the green workspace LED retain their meanings.
 
 Palette values reference the [TheLCARS color guide](https://www.thelcars.com/colors.php). Shakedown uses its own bundled CSS and never contacts the guide to load themes. This development version also updates the credits to Solans Labs.
 
-[0.6.4.6 release notes](docs/RELEASE-0.6.4.6.md) · [Security checks](docs/SECURITY-CHECK-0.6.4.6.md)
+[0.6.5 release notes](docs/RELEASE-0.6.5.md) · [Security checks](docs/SECURITY-CHECK-0.6.5.md)
 
 ## Current published release: v0.6.3
 

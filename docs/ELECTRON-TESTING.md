@@ -1,4 +1,4 @@
-# Electron desktop — 0.6.4.6
+# Electron desktop — 0.6.5
 
 Extract the entire ZIP into a new writable folder, then open Shakedown.exe. Shakedown now opens in its own window, not your browser. Keep all the files in the package together.
 

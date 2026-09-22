@@ -1,4 +1,4 @@
-# STO Shakedown v0.6.4.6 — LCARS themes and desktop polish
+# STO Shakedown v0.6.5 — LCARS themes and desktop polish
 
 - Four local themes: Shakedown (original amber/yellow), Lower Decks, TNG, and Voyager.
 - Color Theme Select opens four choices to the right over the content, without expanding the sidebar. Choices persist between launches.
@@ -9,7 +9,7 @@
 
 ## Install or update
 
-Download sto-shakedown-v0.6.4.6-electron-windows-x64.zip. Extract all files into a NEW writable folder and open Shakedown.exe. This is a portable Windows x64 app, not an installer. Node and Electron are bundled.
+Download sto-shakedown-v0.6.5-electron-windows-x64.zip. Extract all files into a NEW writable folder and open Shakedown.exe. This is a portable Windows x64 app, not an installer. Node and Electron are bundled.
 
 Before updating: close the old app, back up its data folder, then COPY that folder beside the new Shakedown.exe. Keep the old folder and backup until you confirm your ships and saved runs in the new version. Updates do not automatically migrate data. Original combat logs remain in their existing log folder.
 

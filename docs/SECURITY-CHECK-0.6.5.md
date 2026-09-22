@@ -1,4 +1,4 @@
-# Security validation — v0.6.4.6
+# Security validation — v0.6.5
 
 Date: 2026-09-22. Windows x64. Tests used isolated temporary data, never the user's workspace saves.
 

@@ -1,5 +1,9 @@
 # v0.6.3 — Easier analysis and backups
 
+## 0.6.5 — LCARS themes and desktop polish
+
+Four persistent themes, an in-content theme flyout, the new app/EXE icon, Solans Labs credits, and unique download versions. Updated Electron to 44.4.3 and bundled Node to 24.21.0. See [release notes](docs/RELEASE-0.6.5.md) and [security validation](docs/SECURITY-CHECK-0.6.5.md).
+
 - Sort tables while keeping expanded details attached to their rows.
 - Open the data folder and create separate saved-state backups from Log folder settings.
 - Fix missing-runtime exit handling and bound unresponsive backend shutdown.

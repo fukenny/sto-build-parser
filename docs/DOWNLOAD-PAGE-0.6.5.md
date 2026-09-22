@@ -1,4 +1,4 @@
-# Download-page updates for v0.6.4.6
+# Download-page updates for v0.6.5
 
 Besides the version and release link:
 
