@@ -1,3 +1,4 @@
+import {themes,applyTheme} from './themes.js';
 import {enableTableSorting} from './table-sort.js';
 enableTableSorting(document.querySelector('main'));
 import {damageRows,bindDamageRows,sourceRows,comparisonRows} from './drilldown.js';
@@ -57,6 +58,42 @@ exitButton.textContent='Exit Shakedown';exitButton.id='exit-shakedown';
 exitButton.className='nav exit-nav';
 exitButton.innerHTML='<span aria-hidden="true">⏻</span><span>Exit Shakedown</span>';
 document.querySelector('.aside-bottom').prepend(exitButton);
+const themeControl=document.createElement('section');
+themeControl.className='theme-control';themeControl.setAttribute('aria-label','Color theme');
+themeControl.innerHTML='<button id="theme-toggle" type="button" aria-expanded="false" aria-controls="theme-options" disabled><span>COLOR THEME SELECT</span></button><div id="theme-options" role="group" aria-label="Available themes" hidden></div>';
+document.querySelector('.sidebar-spacer').replaceWith(themeControl);
+const themeToggle=$('theme-toggle'),themeOptions=$('theme-options');
+document.body.append(themeOptions);
+function renderTheme(id){
+ const current=applyTheme(id);
+ themeOptions.querySelectorAll('button').forEach(b=>{const selected=b.dataset.theme===current;b.setAttribute('aria-pressed',String(selected));b.querySelector('.theme-mark').textContent=selected?'●':'○';});
+}
+function positionThemes(){
+ const bounds=themeControl.getBoundingClientRect(),width=themeOptions.offsetWidth,height=themeOptions.offsetHeight;
+ const left=bounds.right+8+width<=innerWidth-12?bounds.right+8:Math.max(12,innerWidth-width-12);
+ themeOptions.style.left=left+'px';themeOptions.style.top=Math.max(12,Math.min(bounds.top,innerHeight-height-12))+'px';
+}
+function expandThemes(open){themeToggle.setAttribute('aria-expanded',String(open));themeOptions.hidden=!open;if(open){positionThemes();(themeOptions.querySelector('[aria-pressed="true"]')||themeOptions.querySelector('button')).focus();}}
+window.addEventListener('resize',()=>{if(!themeOptions.hidden)positionThemes();});
+document.querySelector('aside').addEventListener('scroll',()=>{if(!themeOptions.hidden)positionThemes();});
+document.addEventListener('pointerdown',event=>{if(!themeControl.contains(event.target)&&!themeOptions.contains(event.target))expandThemes(false);});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!themeOptions.hidden){expandThemes(false);themeToggle.focus();}});
+
+themeToggle.onclick=()=>expandThemes(themeOptions.hidden);
+themeControl.onclick=event=>{if(!event.target.closest('button')&&!themeToggle.disabled)expandThemes(themeOptions.hidden);};
+themeControl.onkeydown=e=>{if(e.key==='Escape'){expandThemes(false);themeToggle.focus();}};
+for(const theme of themes){
+ const button=document.createElement('button');button.type='button';button.dataset.theme=theme.id;
+ button.innerHTML='<span class="theme-mark" aria-hidden="true"></span><span>'+theme.label+'</span>';
+ button.onclick=async()=>{
+  const previous=state.theme||'shakedown';renderTheme(theme.id);
+  [themeToggle,...themeOptions.querySelectorAll('button')].forEach(b=>b.disabled=true);
+  try{await api('theme',{theme:theme.id});state.theme=theme.id;expandThemes(false);}
+  catch(error){renderTheme(previous);notice(error.message,true);}
+  finally{[themeToggle,...themeOptions.querySelectorAll('button')].forEach(b=>b.disabled=false);themeToggle.focus();}
+ };
+ themeOptions.append(button);
+}
 exitButton.onclick=async()=>{
  exitButton.disabled=true;
  try{
@@ -88,7 +125,7 @@ function renderBuildCards(){
  $('build-list').innerHTML=builds.map(b=>`<article class="panel build-card"><div class="eyebrow">${esc(b.ship)} / ${esc(state.loadouts.find(l=>l.id===b.loadoutId)?.name)}</div><h2>${esc(b.name)}${b.archived?' · Archived':''}</h2><pre>${esc(b.notes||'No equipment notes yet.')}</pre><p>${state.runs.filter(r=>r.buildId===b.id).length} saved runs</p><button data-open-variation="${esc(b.id)}">Open setup & runs →</button></article>`).join('')||'<p>No visible variations. Add a loadout or show archived variations.</p>';
 }
 
-async function refresh(){state=await api('state');if(!state.profiles.some(p=>p.id===activeShip))activeShip=state.profiles[0]?.id||'';options('workspace-ship',state.profiles.map(p=>({value:p.id,label:p.name})),'Choose a ship');$('workspace-ship').value=activeShip;renderShips();$('folder-path').value=state.folder;$('folder-summary').textContent=state.folder||'No folder selected yet. Choose your own STO log location to begin.';options('log',state.logs.map(l=>({value:l.name,label:`${l.name} · ${(l.size/1e6).toFixed(1)} MB`})),'Choose a combat log');buildOptions();renderBuilds();if(detailId)renderVariation();if(state.folderError)notice(state.folderError,true);}
+async function refresh(){state=await api('state');renderTheme(state.theme);themeToggle.disabled=false;if(!state.profiles.some(p=>p.id===activeShip))activeShip=state.profiles[0]?.id||'';options('workspace-ship',state.profiles.map(p=>({value:p.id,label:p.name})),'Choose a ship');$('workspace-ship').value=activeShip;renderShips();$('folder-path').value=state.folder;$('folder-summary').textContent=state.folder||'No folder selected yet. Choose your own STO log location to begin.';options('log',state.logs.map(l=>({value:l.name,label:`${l.name} · ${(l.size/1e6).toFixed(1)} MB`})),'Choose a combat log');buildOptions();renderBuilds();if(detailId)renderVariation();if(state.folderError)notice(state.folderError,true);}
 action('refresh',async()=>{await refresh();notice('Log list refreshed. Import a log again to read newly written events.');});
 action('browse',async()=>{notice('Select any combatlog*.log file. Shakedown will use its containing folder.');const r=await api('browse',{});if(r.folder){$('folder-path').value=r.folder;notice('Folder selected. Click “Use this folder” to validate and remember it.');}else notice('Folder selection cancelled.');});
 action('save-folder',async()=>{await api('folder',{folder:$('folder-path').value});analysis=null;$('results').hidden=true;$('empty').hidden=false;$('encounter').disabled=true;$('player').disabled=true;$('parse-note').textContent='';await refresh();page('analyze');notice('Folder saved. Select a combat log to analyze.');});

@@ -22,6 +22,12 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
   const headers={'X-STO-Token':token,'Content-Type':'application/json'};
   const post=async(route,b)=>{const response=await fetch(base+'/api/'+route,{method:'POST',headers,body:JSON.stringify(b)});return {status:response.status,value:await response.json()};};
   assert.equal((await fetch(base+'/api/state')).status,400);
+  assert.equal((await fetch(base+'/api/theme',{method:'POST',headers:{'Content-Type':'application/json'},body:'{"theme":"classic"}'})).status,400);
+  assert.equal((await post('theme',{theme:'voyager'})).status,200);
+  assert.equal((await post('theme',{theme:'unlisted'})).status,400);
+  assert.equal((await post('theme',{theme:{rail:'red'}})).status,400);
+  assert.equal((await (await fetch(base+'/api/state',{headers})).json()).theme,'voyager');
+  assert.equal(JSON.parse(await readFile(path.join(temp,'data','state.json'),'utf8')).theme,'voyager');
   assert.equal((await fetch(base+'/api/build',{method:'POST',headers:{...headers,Origin:'https://example.com'},body:'{}'})).status,400);
   assert.equal((await post('folder',{folder:temp})).status,400);
   const log='26:09:07:08:00:00.0::Captain,P[1@2 Captain@account],,*,Enemy,C[2 Enemy],Beam,Pn.1,Phaser,,100,110\n26:09:07:08:00:10.0::Captain,P[1@2 Captain@account],,*,Enemy,C[2 Enemy],Beam,Pn.1,Phaser,,200,220\n';
@@ -56,6 +62,7 @@ test('API validates folder, saves and compares real parsed evidence, rejects dup
   assert.equal(comparison.baseline.count,1);assert.equal(comparison.candidate.count,0);
   assert.match(comparison.message,/No matching confirmed runs/);
   const saved=(await (await fetch(base+'/api/state',{headers})).json());
+  assert.equal(saved.theme,'voyager');
   assert.equal(saved.profiles.length,1);assert.equal(saved.loadouts.length,1);
   assert.equal((await post('run/edit',{id:saved.runs[0].id,buildId:b.id,patrolId:'wanted',difficulty:'Elite',party:'Group',spaceConfirmed:true})).status,200);
   const edited=await(await fetch(base+'/api/state',{headers})).json();

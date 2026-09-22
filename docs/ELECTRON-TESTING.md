@@ -1,4 +1,4 @@
-# Electron desktop — 0.6.3
+# Electron desktop — 0.6.4.6
 
 Extract the entire ZIP into a new writable folder, then open Shakedown.exe. Shakedown now opens in its own window, not your browser. Keep all the files in the package together.
 
@@ -8,4 +8,4 @@ Closing the window or choosing Exit Shakedown shuts down the local server after 
 
 Test import, analysis, save, comparison, folder browsing, resize, closing/reopening, and a second launch. Node and Electron are bundled. No separate Node installation is needed.
 
-This is an unsigned test ZIP, not an installer or public release. Publisher signing, icons, automatic updates, and AppData migration are future work. Windows may show an unknown-publisher warning.
+This is an unsigned test ZIP, not an installer. Publisher signing, automatic updates, and AppData migration are future work. Windows may show an unknown-publisher warning.

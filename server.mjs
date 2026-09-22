@@ -1,3 +1,4 @@
+import {themeById} from './public/themes.js';
 import http from 'node:http';
 import {readFile, writeFile, mkdir, rename, readdir, stat, realpath} from 'node:fs/promises';
 import path from 'node:path';
@@ -102,7 +103,11 @@ const server = http.createServer(async (req,res)=>{
       demand(req.method === 'POST', 'Unsupported request.');
       const b = await body(req);
       demand(!stopping,'Shakedown is shutting down.');
-      if(url.pathname==='/api/backup')return json({folder:await backupState(store.state,data)});
+      if(url.pathname==='/api/theme') {
+          demand(typeof b.theme==='string'&&!!themeById(b.theme),'Choose a listed color scheme.');
+          await store.transact(draft=>{draft.theme=b.theme;});return json({theme:b.theme});
+        }
+        if(url.pathname==='/api/backup')return json({folder:await backupState(store.state,data)});
       if(url.pathname==='/api/open-data') {
         demand(process.env.STO_DESKTOP==='1'&&process.connected,'Data folder: '+data);
         await desktopRequest('desktop-open-data');return json({folder:data});
@@ -275,7 +280,7 @@ const server = http.createServer(async (req,res)=>{
       res.writeHead(200,{'Content-Type':'font/ttf','Cache-Control':'public, max-age=86400'});
       return res.end(await readFile(path.join(root,'public/fonts/Antonio.ttf')));
     }
-    const assets={'/':'index.html','/app.js':'app.js','/table-sort.js':'table-sort.js','/drilldown.js':'drilldown.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
+    const assets={'/themes.css':'themes.css','/themes.js':'themes.js','/':'index.html','/app.js':'app.js','/table-sort.js':'table-sort.js','/drilldown.js':'drilldown.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
     if(url.pathname==='/') content=content.replaceAll('__VERSION__',version);

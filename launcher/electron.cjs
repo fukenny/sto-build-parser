@@ -55,7 +55,7 @@ async function start(){
  backend.stdout.on('data',async b=>{
   output+=b;const match=output.match(/http:\/\/127\.0\.0\.1:\d+\/#session=[a-f0-9]+/);if(!match||window)return;
   clearTimeout(startupTimer);const url=match[0],origin=new URL(url).origin;output='';
-  window=new BrowserWindow({width:1500,height:1000,minWidth:800,minHeight:600,backgroundColor:'#000000',title:'STO Shakedown',autoHideMenuBar:true,show:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
+  window=new BrowserWindow({width:1500,height:1000,minWidth:800,minHeight:600,backgroundColor:'#000000',title:'STO Shakedown',icon:path.join(root,'launcher','shakedown.ico'),autoHideMenuBar:true,show:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
   window.removeMenu();
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   window.webContents.on('will-navigate',(event,target)=>{if(new URL(target).origin!==origin)event.preventDefault();});
