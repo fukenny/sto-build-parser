@@ -1,3 +1,5 @@
+import {installShipyardGuides} from './page-guide.js';
+installShipyardGuides();
 import {themes,applyTheme} from './themes.js';
 import {enableTableSorting} from './table-sort.js';
 enableTableSorting(document.querySelector('main'));

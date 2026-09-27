@@ -1,0 +1,12 @@
+.page-guide-launch{align-self:flex-start;white-space:nowrap}
+dialog.page-guide{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;color:var(--text-primary);overflow:hidden}
+dialog.page-guide::backdrop{background:transparent}
+.guide-spotlight{position:absolute;border:3px solid var(--active);border-radius:12px;box-shadow:0 0 0 200vmax var(--surface-backdrop);pointer-events:none}
+.guide-card{position:absolute;box-sizing:border-box;width:min(430px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:var(--surface-base);border:solid var(--frame-panel);border-width:8px 2px 3px 16px;border-radius:28px 0 0 0;padding:18px 20px}
+.guide-card h2{margin:8px 0;color:var(--text-heading)}
+.guide-card p{line-height:1.6}
+.guide-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:18px}
+.guide-actions button:last-child{background:var(--accent-secondary);color:var(--text-inverse)}
+.guide-actions button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+.lcars-console main button.page-guide-launch{background:var(--alert);border-color:var(--alert);color:var(--surface-base)}

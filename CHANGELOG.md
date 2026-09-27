@@ -1,3 +1,7 @@
+# v0.6.6
+
+Add optional, theme-aware Tour Shipyard walkthroughs for ship profiles, loadouts, variations, and saved evidence. Preserve the existing application frame.
+
 # v0.6.3 — Easier analysis and backups
 
 ## 0.6.5 — LCARS themes and desktop polish
@@ -113,3 +117,4 @@ Four persistent themes, an in-content theme flyout, the new app/EXE icon, Solans
 - Initial local combat-log analysis and versioned build evidence workflow.
 - User-selected folder, encounter and full-log views, player and owned-source damage breakdowns, local persistence, and descriptive comparisons.
 - Shipyard welcome guide, walkthrough, full-log explanations, and duplicate/overlapping-evidence protection.
+

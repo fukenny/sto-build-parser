@@ -1,22 +1,18 @@
 # STO Shakedown
 
-## Release candidate: v0.6.5
+## Current release: v0.6.6 — Tour Shipyard
 
-The **Color Theme** LCARS panel between **Compare Builds** and **Exit Shakedown** opens a panel to the right over the page content, offering Shakedown (the earlier amber palette), Lower Decks, TNG, and Voyager. Selecting a theme applies it and closes the choices. The choice is saved in local app settings. Existing amber selections remain on Lower Decks. The desktop window and EXE use the supplied STO Shakedown icon. Layout and fonts remain the same; chart warning colors and the green workspace LED retain their meanings.
+[Download the Windows x64 desktop ZIP](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.6)
 
-Palette values reference the [TheLCARS color guide](https://www.thelcars.com/colors.php). Shakedown uses its own bundled CSS and never contacts the guide to load themes. This development version also updates the credits to Solans Labs.
+New to ship profiles, loadouts, or variations? Choose **Tour Shipyard** on Your ships or inside a ship profile. Short explanations highlight the real controls, with Back, Next, Finish, and Close. Escape dismisses the tour. The button uses your theme's alert color, and the tour adapts to an empty shipyard or existing ships. Tours explain the workflow without creating or changing saved data.
 
-[0.6.5 release notes](docs/RELEASE-0.6.5.md) · [Security checks](docs/SECURITY-CHECK-0.6.5.md)
+Includes the four LCARS themes from 0.6.5: **Shakedown, Lower Decks, TNG, and Voyager**, plus the Shakedown desktop icon and Solans Labs branding. Themes use our own bundled CSS. The existing header, navigation, analysis, and drill-down tables are preserved.
 
-## Current published release: v0.6.3
+**Updating:** Close the old app, back up its `data` folder, extract the new ZIP into a new folder, then copy `data` beside the new **Shakedown.exe** before launching. Verify your ships and runs before removing the old copy. Updates do not automatically transfer data.
 
-[Download the Windows desktop ZIP and read the release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.3).
+Windows x64 portable ZIP, unsigned alpha, not an installer. No separate Node installation is needed. The optional `.sha256` file is a checksum, not a second download of the app.
 
-Sortable tables, expandable combat evidence, an outgoing-damage chart, Explorer-style log selection, and **Open data folder / Back up saved data** controls. Startup and shutdown error handling is improved. The existing LCARS frame is unchanged.
-
-Extract the entire ZIP and launch **Shakedown.exe**. Before updating, close the old app and back up and copy its `data` folder beside the new EXE. This is an unsigned portable Windows x64 app, not an installer. No separate Node installation is needed.
-
-[Full 0.6.3 notes](docs/RELEASE-0.6.3.md) · [Version history](CHANGELOG.md)
+[Release notes](docs/RELEASE-0.6.6.md) · [Version history](CHANGELOG.md) · [Security limitations](docs/SECURITY-HARDENING.md)
 
 Test your Star Trek Online ship builds using space-patrol combat logs.
 
@@ -137,3 +133,4 @@ The server binds only to 127.0.0.1 and checks request tokens and origin/host hea
 Node standard-library server, vanilla HTML/CSS/JS, JSON persistence, no npm dependencies. Run `node server.mjs` or `npm start`. Run `npm test`. Set `PORT` or `STO_DATA_DIR` for isolated testing.
 
 Research references: [OSCR](https://github.com/STOCD/OSCR) and [STO-CLARE](https://github.com/raman78/STO-CLARE). No source from those projects is vendored. The parser still needs wider cross-validation on real encounters.
+
