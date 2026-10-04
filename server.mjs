@@ -1,3 +1,5 @@
+import {captureShip,stopCapture,importSnapshot} from './lib/ship-capture.mjs';
+let pendingCapture=null;
 import {themeById} from './public/themes.js';
 import http from 'node:http';
 import {readFile, writeFile, mkdir, rename, readdir, stat, realpath} from 'node:fs/promises';
@@ -48,7 +50,7 @@ async function shutdown() {
   stopping=true;clearTimeout(closeTimer);
   console.log('Stopping STO Shakedown and finishing saved writes…');
   for(const res of browserConnections)res.end();
-  pickerChild?.kill();
+  pickerChild?.kill();stopCapture();
   server.close();
   await stopParsers();
   await store.drain();
@@ -103,6 +105,24 @@ const server = http.createServer(async (req,res)=>{
       demand(req.method === 'POST', 'Unsupported request.');
       const b = await body(req);
       demand(!stopping,'Shakedown is shutting down.');
+      if(url.pathname==='/api/ship-capture') {
+        const character=text(b.character,'your STO character name',100),loadout=text(b.loadout,'your saved STO loadout name',100);
+        demand(!character.startsWith('-')&&!loadout.startsWith('-'),'Names cannot begin with a dash.');
+        pendingCapture=null;
+        const result=await captureShip(root,character,loadout);
+        pendingCapture={id:randomUUID(),expires:Date.now()+15*60*1000,result};
+        return json({id:pendingCapture.id,...result});
+      }
+      if(url.pathname==='/api/ship-capture/import') {
+        demand(pendingCapture&&b.captureId===pendingCapture.id&&Date.now()<pendingCapture.expires,'Capture expired. Capture again.');
+        demand(b.confirmed===true,'Confirm the ship and equipment before importing.');
+        const capture=pendingCapture.result;
+        demand(Number.isInteger(b.shipIndex)&&Number.isInteger(b.recordIndex),'Select a ship and loadout record.');
+        const ship=capture.ships[b.shipIndex],loadout=capture.records[b.recordIndex];
+        demand(ship&&loadout,'Choose listed capture records.');
+        const snapshot={schemaVersion:1,source:'STO saved loadout — user-confirmed experimental memory capture',capturedAt:capture.capturedAt,character:capture.character,ship,loadout,warning:capture.warning};
+        return json(await store.transact(draft=>importSnapshot(draft,snapshot,b)));
+      }
       if(url.pathname==='/api/theme') {
           demand(typeof b.theme==='string'&&!!themeById(b.theme),'Choose a listed color scheme.');
           await store.transact(draft=>{draft.theme=b.theme;});return json({theme:b.theme});
@@ -280,7 +300,7 @@ const server = http.createServer(async (req,res)=>{
       res.writeHead(200,{'Content-Type':'font/ttf','Cache-Control':'public, max-age=86400'});
       return res.end(await readFile(path.join(root,'public/fonts/Antonio.ttf')));
     }
-    const assets={'/page-guide.js':'page-guide.js','/page-guide.css':'page-guide.css','/themes.css':'themes.css','/themes.js':'themes.js','/':'index.html','/app.js':'app.js','/table-sort.js':'table-sort.js','/drilldown.js':'drilldown.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
+    const assets={'/ship-capture.js':'ship-capture.js','/ship-capture.css':'ship-capture.css','/page-guide.js':'page-guide.js','/page-guide.css':'page-guide.css','/themes.css':'themes.css','/themes.js':'themes.js','/':'index.html','/app.js':'app.js','/table-sort.js':'table-sort.js','/drilldown.js':'drilldown.js','/patrols.js':'patrols.js','/style.css':'style.css','/console.css':'console.css'};
     if(!assets[url.pathname]) {res.writeHead(404);return res.end('Not found');}
     let content=await readFile(path.join(root,'public',assets[url.pathname]),'utf8');
     if(url.pathname==='/') content=content.replaceAll('__VERSION__',version);
