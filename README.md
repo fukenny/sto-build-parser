@@ -1,22 +1,18 @@
 # STO Shakedown
 
-## Current release: v0.6.6 — Tour Shipyard
+## Current release: v0.6.8 — Equipment capture
 
-[Download the Windows x64 desktop ZIP](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.6)
+[Download the Windows desktop ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.6.8/sto-shakedown-v0.6.8-electron-windows-x64.zip) · [Release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.8)
 
-New to ship profiles, loadouts, or variations? Choose **Tour Shipyard** on Your ships or inside a ship profile. Short explanations highlight the real controls, with Back, Next, Finish, and Close. Escape dismisses the tour. The button uses your theme's alert color, and the tour adapts to an empty shipyard or existing ships. Tours explain the workflow without creating or changing saved data.
+Extract the entire ZIP and open **Shakedown.exe**. Choose the named **electron-windows-x64.zip** asset, not GitHub's Source code archives or Code → Download ZIP. The application opens in its own desktop window.
 
-Includes the four LCARS themes from 0.6.5: **Shakedown, Lower Decks, TNG, and Voyager**, plus the Shakedown desktop icon and Solans Labs branding. Themes use our own bundled CSS. The existing header, navigation, analysis, and drill-down tables are preserved.
+Capture saved STO equipment into a Shakedown variation, including supported marks, rarities, and modifiers. Review the ship and equipment before importing. Capture is experimental and supports the verified STO client version only. Equipment snapshots are for reference; analysis and comparisons still use combat logs and your run assignments.
 
-**Updating:** Close the old app, back up its `data` folder, extract the new ZIP into a new folder, then copy `data` beside the new **Shakedown.exe** before launching. Verify your ships and runs before removing the old copy. Updates do not automatically transfer data.
-
-Windows x64 portable ZIP, unsigned alpha, not an installer. No separate Node installation is needed. The optional `.sha256` file is a checksum, not a second download of the app.
-
-[Release notes](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/RELEASE-0.6.6.md) · [Version history](https://github.com/fukenny/sto-build-parser/blob/0.6.6/CHANGELOG.md) · [Security limitations](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/SECURITY-HARDENING.md)
+**Updating:** Close the old app, back up its data folder, and copy data beside the new Shakedown.exe before launching. Keep your original backup. This unsigned Windows x64 alpha is portable, not an installer. Node is included. The .sha256 file is an optional checksum.
 
 Test your Star Trek Online ship builds using space-patrol combat logs.
 
-[Security hardening and remaining limitations](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/SECURITY-HARDENING.md).
+[Security hardening and remaining limitations](docs/SECURITY-HARDENING.md).
 
 ## v0.6.0 desktop tester preview
 
@@ -26,9 +22,9 @@ Shakedown now opens in its own desktop window. Extract the entire ZIP to a writa
 
 Before moving your data, close the old app and back up its `data` folder. Copy that folder beside the new `Shakedown.exe`. Keep the original backup. Closing the desktop window shuts down the local backend; saved data stays beside the EXE.
 
-All 21 automated tests and the exercised Electron isolation, API authorization, navigation, saved-data, and renderer-crash checks passed. Remaining startup/shutdown edge cases and untested scenarios are documented in the [security check report](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/SECURITY-CHECK-0.6.0.md). These internal checks are not a security certification.
+All 21 automated tests and the exercised Electron isolation, API authorization, navigation, saved-data, and renderer-crash checks passed. Remaining startup/shutdown edge cases and untested scenarios are documented in the [security check report](docs/SECURITY-CHECK-0.6.0.md). These internal checks are not a security certification.
 
-[Desktop testing instructions](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/ELECTRON-TESTING.md).
+[Desktop testing instructions](docs/ELECTRON-TESTING.md).
 
 ## New in v0.5.7
 
@@ -43,7 +39,7 @@ The Windows alpha includes the amber LCARS frame, orange headlines, and Patrol /
 - Copy equipment notes into a new variation, or archive/restore a variation without losing runs.
 - **Analyze a new run with [variation]** selects the setup before importing fresh evidence.
 
-See the [updated user guide](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/USER-GUIDE.md) for the full workflow.
+See the [updated user guide](docs/USER-GUIDE.md) for the full workflow.
 
 ## Download for Windows
 
@@ -110,7 +106,7 @@ GitHub's automatic **source-code ZIP** is for developers and requires Node 22+. 
 
 Example: **USS Elston → Beam Broadside → Baseline / Elite Valkyrie test**, with several runs per variation. Saved runs can be relabeled or moved using **Edit label / version**. Missing comparison evidence displays the available labels rather than inventing zero damage.
 
-[Quick start](START-HERE.txt) · [User guide](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/USER-GUIDE.md) · [Metrics](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/METRICS.md) · [Changelog](https://github.com/fukenny/sto-build-parser/blob/0.6.6/CHANGELOG.md) · [Development](https://github.com/fukenny/sto-build-parser/blob/0.6.6/docs/DEVELOPMENT.md)
+[Quick start](START-HERE.txt) · [User guide](docs/USER-GUIDE.md) · [Metrics](docs/METRICS.md) · [Changelog](CHANGELOG.md) · [Development](docs/DEVELOPMENT.md)
 
 ## Capabilities and limits
 
