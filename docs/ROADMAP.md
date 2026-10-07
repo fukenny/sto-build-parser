@@ -1,5 +1,8 @@
 # Scope after the demo
 
+## Local data control
+Add a clearly labeled **Delete all local Shakedown data** action so users can start again. Show exactly which app-owned data will be removed, offer a backup, and require explicit confirmation. Define how backups are handled; never delete STO combat logs or game files. Planned only; not implemented in 0.6.7.2.
+
 ## Current demo
 Import real logs; inspect damage and survivability; record manual build versions; compare repeat runs. Include an accessible quick-start guide and standalone runtime in the portable Windows download.
 

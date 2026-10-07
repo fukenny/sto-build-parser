@@ -57,7 +57,10 @@ async function start(){
   clearTimeout(startupTimer);const url=match[0],origin=new URL(url).origin;output='';
   window=new BrowserWindow({width:1500,height:1000,minWidth:800,minHeight:600,backgroundColor:'#000000',title:'STO Shakedown',icon:path.join(root,'launcher','shakedown.ico'),autoHideMenuBar:true,show:false,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
   window.removeMenu();
-  window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+  window.webContents.setWindowOpenHandler(({url:target})=>{
+   if(target==='https://discord.gg/Wu3hZz6qg')void shell.openExternal(target).catch(()=>{});
+   return {action:'deny'};
+  });
   window.webContents.on('will-navigate',(event,target)=>{if(new URL(target).origin!==origin)event.preventDefault();});
   window.webContents.on('will-attach-webview',event=>event.preventDefault());
   window.webContents.on('render-process-gone',()=>stop());

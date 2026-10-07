@@ -1,5 +1,5 @@
-PRIVATE LOCAL SESSION: Start using Start.cmd. Use the authenticated browser tab.
-If it is lost, close the launcher and restart. The console prints a private startup
+DESKTOP APP: Open Shakedown.exe from the fully extracted Electron ZIP.
+Start.cmd is a legacy developer browser launcher, not the desktop app. The private startup
 URL for manual fallback; do not share it. See docs/SECURITY-HARDENING.md.
 
 NEW IN 0.5: Choose your ship workspace. Patrol category, mission, difficulty,
@@ -8,13 +8,13 @@ Older runs: Edit label / version to confirm patrol settings before comparing.
 Compare now includes weapon/ability and combined pet-source damage and DPS.
 Asterisk = randomized enemies can affect results. Pet ranks are not guessed.
 
-STO SHAKEDOWN v0.5.5 - QUICK START
+STO SHAKEDOWN v0.6.8 - QUICK START
 Created by Solans Labs
 
 1. Extract the complete Windows x64 portable ZIP into a writable folder.
-   Double-click Start.cmd. It includes Node and opens your existing browser.
+   Double-click Shakedown.exe. It includes Node and opens its own desktop window.
    No Node, npm, Codex, or other software installation is needed.
-   Use Exit Shakedown to stop immediately. Closing all Shakedown tabs stops the server after 15 seconds; keep the launcher open while using the app.
+   Use Exit Shakedown or close the desktop window to stop the app.
 2. Before flying, type /combatlog 1 in STO chat.
 3. Choose Log folder in Shakedown and select your own GameClient folder.
 4. Open Ship profiles. Enter your ship, a loadout (Beam Broadside), and a

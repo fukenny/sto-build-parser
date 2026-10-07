@@ -1,3 +1,7 @@
+# v0.6.8 — Equipment capture
+
+Experimental saved-loadout snapshots, supported mark/rarity/modifiers, corrected categories, cleaner equipment display, and Discord/footer/log-folder polish. See docs/RELEASE-0.6.8.md. Equipment capture does not alter combat-log calculations.
+
 # v0.6.6
 
 Add optional, theme-aware Tour Shipyard walkthroughs for ship profiles, loadouts, variations, and saved evidence. Preserve the existing application frame.

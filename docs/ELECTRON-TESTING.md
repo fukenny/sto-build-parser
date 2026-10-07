@@ -1,4 +1,4 @@
-# Electron desktop — 0.6.7.1 development preview
+# Electron desktop — 0.6.8 development preview
 
 Shipyard now has **Capture my ship**. Run STO, save your loadout in space, enter the character and saved-loadout names, review the equipment, and confirm a new variation. See resources/app/docs/SHIP-CAPTURE-PREVIEW.md for limitations and instructions. This is a local preview, not a public release.
 

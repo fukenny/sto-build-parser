@@ -1,18 +1,14 @@
 # STO Shakedown
 
-## Current release: v0.6.6 — Tour Shipyard
+## Current release: v0.6.8 — Equipment capture
 
-[Download the Windows x64 desktop ZIP](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.6)
+[Download the Windows desktop ZIP](https://github.com/fukenny/sto-build-parser/releases/download/v0.6.8/sto-shakedown-v0.6.8-electron-windows-x64.zip) · [Release notes](https://github.com/fukenny/sto-build-parser/releases/tag/v0.6.8)
 
-New to ship profiles, loadouts, or variations? Choose **Tour Shipyard** on Your ships or inside a ship profile. Short explanations highlight the real controls, with Back, Next, Finish, and Close. Escape dismisses the tour. The button uses your theme's alert color, and the tour adapts to an empty shipyard or existing ships. Tours explain the workflow without creating or changing saved data.
+Extract the entire ZIP and open **Shakedown.exe**. Choose the named **electron-windows-x64.zip** asset, not GitHub's Source code archives or Code → Download ZIP. The application opens in its own desktop window.
 
-Includes the four LCARS themes from 0.6.5: **Shakedown, Lower Decks, TNG, and Voyager**, plus the Shakedown desktop icon and Solans Labs branding. Themes use our own bundled CSS. The existing header, navigation, analysis, and drill-down tables are preserved.
+Capture saved STO equipment into a Shakedown variation, including supported marks, rarities, and modifiers. Review the ship and equipment before importing. Capture is experimental and supports the verified STO client version only. Equipment snapshots are for reference; analysis and comparisons still use combat logs and your run assignments.
 
-**Updating:** Close the old app, back up its `data` folder, extract the new ZIP into a new folder, then copy `data` beside the new **Shakedown.exe** before launching. Verify your ships and runs before removing the old copy. Updates do not automatically transfer data.
-
-Windows x64 portable ZIP, unsigned alpha, not an installer. No separate Node installation is needed. The optional `.sha256` file is a checksum, not a second download of the app.
-
-[Release notes](docs/RELEASE-0.6.6.md) · [Version history](CHANGELOG.md) · [Security limitations](docs/SECURITY-HARDENING.md)
+**Updating:** Close the old app, back up its data folder, and copy data beside the new Shakedown.exe before launching. Keep your original backup. This unsigned Windows x64 alpha is portable, not an installer. Node is included. The .sha256 file is an optional checksum.
 
 Test your Star Trek Online ship builds using space-patrol combat logs.
 

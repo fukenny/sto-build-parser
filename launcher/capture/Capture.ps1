@@ -34,4 +34,6 @@ $records=@(foreach($ref in $refs.References){try{
  if($items.Count -gt 0 -and $items.Count -le 256 -and @($items | Where-Object bag -eq 53).Count){[pscustomobject]@{name=$LoadoutName;lastSave=[BitConverter]::ToUInt32($b,140);items=$items}}
 }catch{}})
 if(!$records.Count){throw 'No populated ship loadout found. Save the loadout in STO, then try again.'}
-[pscustomobject]@{schemaVersion=1;capturedAt=[DateTime]::UtcNow.ToString('o');character=$CharacterName;executableHash=$hash;ships=$ships;records=@($records | Sort-Object lastSave -Descending);warning='Experimental memory capture. Older copies can remain. Ship/loadout ownership is not automatically verified. Confirm the ship and equipment before importing. Marks, modifiers, traits and officers are not captured.'} | ConvertTo-Json -Depth 8 -Compress
+. "$PSScriptRoot/Item-Details.ps1"
+Add-ItemDetails $records
+[pscustomobject]@{schemaVersion=1;capturedAt=[DateTime]::UtcNow.ToString('o');character=$CharacterName;executableHash=$hash;ships=$ships;records=@($records | Sort-Object lastSave -Descending);warning='Experimental memory capture. Older copies can remain. Confirm the ship and equipment before importing. Mark, rarity and modifiers are observed from matching item records now, not proven historical values at the loadout save time. Unresolved or conflicting details remain unavailable. Traits and bridge officer assignments are not captured.'} | ConvertTo-Json -Depth 10 -Compress

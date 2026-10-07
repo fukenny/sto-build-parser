@@ -141,6 +141,7 @@ body.lcars-console{}
 .lcars-console #settings>.panel{position:relative;border:0;border-left:64px solid var(--accent-secondary);border-top:10px solid var(--accent-secondary);border-bottom:6px solid var(--accent-secondary);padding:24px 28px;margin-bottom:6px;min-width:0}
 .lcars-console #settings>.page-title+.panel{border-top-left-radius:96px 42px}
 .lcars-console #settings>.panel::before{position:absolute;left:-64px;top:36px;width:64px;text-align:center;font:500 28px/1 var(--display);color:var(--text-inverse);content:'01'}
+.lcars-console #settings>.page-title+.panel::before{content:'00'}
 .lcars-console #settings>.panel:last-child{border-color:var(--accent-tertiary)}
 .lcars-console #settings>.panel:last-child::before{content:'02'}
 .lcars-console #settings>.panel h2{margin:0 0 20px}

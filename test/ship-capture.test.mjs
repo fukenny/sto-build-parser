@@ -17,9 +17,9 @@ test('observed ship equipment categories follow slots and keep unknown records s
   [57,''],[59,''],[66,''],[80,'Officer record'],[999,'Unknown']
  ].map(([bag,name])=>({bag,name,slot:0,itemId:'123'}));
  const groups=equipmentGroups(records);
- assert.deepEqual(groups.slice(0,13).map(g=>g.label),['Fore weapons','Aft weapons','Deflector','Impulse engines','Warp / singularity core','Shield','Universal console slots','Engineering console slots','Science console slots','Tactical console slots','Devices','Hangars','Vanity slipstream']);
+ assert.deepEqual(groups.slice(0,15).map(g=>g.label),['Fore weapons','Aft weapons','Hangar Pets','Deflector','Impulse engines','Warp / singularity core','Shield','Universal console slots','Engineering console slots','Science console slots','Tactical console slots','Devices','Vanity Deflector (unverified)','Vanity Impulse','Vanity Shields']);
  assert.equal(groups.find(g=>g.label==='Engineering console slots').items[0].name,'Console - Universal - Assimilated Module');
- assert(groups.slice(13).every(g=>g.label.startsWith('Unverified slot category')));
+ assert(groups.slice(15,-1).every(g=>g.label.startsWith('Unverified slot category'))); assert.equal(groups.at(-1).label,'Active Duty Officers');
  assert.equal(groups.flatMap(g=>g.items).length,records.length);
  assert.equal(records[0].bag,62);
 });

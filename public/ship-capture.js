@@ -1,11 +1,19 @@
+import {describeItemDetails} from './item-details.js';
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function detailsMarkup(item){
+ if(item.itemId==='0')return '';
+ const details=describeItemDetails(item.itemDetails);
+ if(details.status)return item.itemDetails?.status==='conflicting-records'?`<small>Conflicting item records — check this item in STO.</small>`:'';
+ const labels=[details.mark,details.rarity,details.modifiers].filter(value=>value&&!value.endsWith('unavailable'));
+ return labels.length?`<small class="item-properties">${escape(labels.join(' · '))}</small>`:'';
+}
 // Observed slot IDs, checked against Elston and Sunnyside captures and equipment UI.
 // Console categories describe the equipped slot, not the console's item type.
-const bags={53:'Fore weapons',54:'Aft weapons',65:'Deflector',60:'Impulse engines',62:'Warp / singularity core',58:'Shield',72:'Universal console slots',69:'Engineering console slots',71:'Science console slots',68:'Tactical console slots',73:'Devices',74:'Hangars',61:'Vanity slipstream'};
-const bagOrder=[53,54,65,60,62,58,72,69,71,68,73,74,61];
+const bags={53:'Fore weapons',54:'Aft weapons',65:'Deflector',60:'Impulse engines',62:'Warp / singularity core',58:'Shield',72:'Universal console slots',69:'Engineering console slots',71:'Science console slots',68:'Tactical console slots',73:'Devices',74:'Hangar Pets',61:'Vanity Impulse',59:'Vanity Shields',66:'Vanity Deflector (unverified)',80:'Active Duty Officers'};
+const bagOrder=[53,54,74,65,60,62,58,72,69,71,68,73,66,61,59];
 export function equipmentGroups(items){
  return [...new Set(items.map(i=>i.bag))].sort((a,b)=>{
-  const rank=id=>bagOrder.includes(id)?bagOrder.indexOf(id):bagOrder.length;
+  const rank=id=>id===80?bagOrder.length+1:bagOrder.includes(id)?bagOrder.indexOf(id):bagOrder.length;
   return rank(a)-rank(b)||a-b;
  }).map(id=>({id,label:bags[id]||`Unverified slot category · ${id}`,items:items.filter(i=>i.bag===id).sort((a,b)=>a.slot-b.slot)}));
 }
@@ -13,7 +21,8 @@ export function equipmentMarkup(snapshot){
  if(!snapshot)return '';
  const items=snapshot.loadout.items;
  const groups=equipmentGroups(items);
- return `<section class="captured-equipment"><h2>Captured equipment · ${escape(snapshot.loadout.name)}</h2><p>${escape(snapshot.ship.name)} · ${escape(snapshot.character)} · Captured ${escape(new Date(snapshot.capturedAt).toLocaleString())}</p><p class="muted">Saved snapshot, not a live connection. Marks, modifiers, traits and officer assignments are not verified. Unverified slot categories are kept separate. Console headings identify the slot type.</p><div class="equipment-grid">${groups.map(group=>`<section><h3>${escape(group.label)}</h3>${group.items.map(i=>`<div class="equipment-slot"><span class="equipment-number">${i.slot+1}</span><div><strong>${escape(i.itemId==='0'?'Empty saved slot':i.name||i.definition||'Unresolved item')}</strong><small>Item ${escape(i.itemId)}${i.ownerItem?' · character-owned':''}</small></div></div>`).join('')}</section>`).join('')}</div></section>`;
+ const incomplete=items.some(i=>i.itemId!=='0'&&(()=>{const d=describeItemDetails(i.itemDetails);return d.status||d.modifierNote||d.mark?.endsWith('unavailable')||d.rarity?.endsWith('unavailable');})());
+ return `<section class="captured-equipment"><h2>Captured equipment · ${escape(snapshot.loadout.name)}</h2><p>${escape(snapshot.ship.name)} · ${escape(snapshot.character)} · Captured ${escape(new Date(snapshot.capturedAt).toLocaleString())}</p><p class="muted">Saved snapshot, not a live connection. Item details reflect capture time. Confirm this setup matches your flight.${incomplete?' Some item details weren’t captured or decoded; missing values are not assumed to be zero.':''}</p><div class="equipment-grid">${groups.map(group=>`<section><h3>${escape(group.label)}</h3>${group.items.map(i=>`<div class="equipment-slot"><span class="equipment-number">${i.slot+1}</span><div><strong>${escape(i.itemId==='0'?'Empty saved slot':i.name||i.definition||'Unresolved item')}</strong>${detailsMarkup(i)}</div></div>`).join('')}</section>`).join('')}</div><details class="capture-diagnostics"><summary>Capture details</summary><p>Traits and bridge officer assignments are not captured. Console headings identify slot type. Mark, rarity and modifiers are not proven historical loadout-save values. IDs are retained for troubleshooting.</p>${groups.map(group=>`<h3>${escape(group.label)}</h3>${group.items.map(i=>{const d=describeItemDetails(i.itemDetails);return `<p>Slot ${i.slot+1} · ${escape(i.name||i.definition||'Empty saved slot')}<br>Item ${escape(i.itemId)} · category ${group.id}${i.ownerItem?' · character-owned':''}${i.itemId!=='0'?`<br>${escape(d.status||[d.mark,d.rarity,d.modifiers,d.modifierNote].filter(Boolean).join(' · '))}`:''}</p>`;}).join('')}`).join('')}</details></section>`;
 }
 export function installShipCapture({api,getState,onImported}){
  const dialog=document.createElement('dialog');dialog.className='ship-capture-dialog';dialog.setAttribute('aria-labelledby','capture-title');
@@ -25,7 +34,7 @@ export function installShipCapture({api,getState,onImported}){
  function loadouts(){const list=getState().loadouts.filter(l=>l.profileId===$('profile').value);$('loadout').innerHTML='<option value="">Use captured name (create if needed)</option>'+list.map(l=>`<option value="${escape(l.id)}">${escape(l.name)}</option>`).join('');}
  $('profile').onchange=loadouts;$('ship').onchange=()=>{render();profiles();};$('record').onchange=render;
  $('confirm').onchange=()=>{$('import').disabled=!$('confirm').checked;};
- $('read').onclick=async()=>{if(reading)return;reading=true;$('read').disabled=true;$('preview').hidden=true;$('status').textContent='Reading STO… this can take up to 100 seconds. You can close this preview while it finishes.';try{
+ $('read').onclick=async()=>{if(reading)return;reading=true;$('read').disabled=true;$('preview').hidden=true;$('status').textContent='Reading STO… this can take up to 140 seconds. You can close this preview while it finishes.';try{
   capture=await api('ship-capture',{character:$('character').value,loadout:$('name').value});
   $('ship').innerHTML=capture.ships.map((s,i)=>`<option value="${i}">${escape(s.name)} · ${escape(s.id)}</option>`).join('');
   $('record').innerHTML=capture.records.map((r,i)=>`<option value="${i}">Record ${i+1} · ${r.items.length} entries · save counter ${r.lastSave}${i===0?' (newest found)':''}</option>`).join('');
