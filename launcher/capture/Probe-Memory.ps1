@@ -36,6 +36,7 @@ public static class StoProbe {
     public sealed class Report {
         public int ProcessId; public long BytesRead; public int ReadFailures;
         public string StopReason; public double ElapsedSeconds;
+        public bool CandidateLimitReached;
         public List<Hit> Candidates = new List<Hit>();
     }
     public static byte[] Read(int pid, ulong address, int length) {
@@ -132,7 +133,7 @@ public static class StoProbe {
                         int n=(int)actual.ToUInt64(); r.BytesRead+=n;
                         if(!ok) r.ReadFailures++;
                         for(int k=0;k<patterns.Count;k++) {
-                            if(counts[k]>=512) continue;
+                            if(counts[k]>=8192) continue;
                             byte[] p=patterns[k]; int pos=0;
                             while(pos<=n-p.Length) {
                                 pos=Array.IndexOf(buffer,p[0],pos,n-p.Length-pos+1);
@@ -142,7 +143,7 @@ public static class StoProbe {
                                     string hex="0x"+(cursor+(ulong)pos).ToString("X");
                                     if(seen.Add(k+":"+hex)) {
                                         r.Candidates.Add(new Hit {Text=labels[k],Encoding=encodings[k],Address=hex,RegionType=mbi.Type});
-                                        if(++counts[k]>=512) break;
+                                        if(++counts[k]>=8192) { r.CandidateLimitReached=true; break; }
                                     }
                                 }
                                 pos++;

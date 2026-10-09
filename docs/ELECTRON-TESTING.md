@@ -1,6 +1,6 @@
-# Electron desktop — 0.6.8 development preview
+# Electron desktop — 0.6.8.1 capture hotfix
 
-Shipyard now has **Capture my ship**. Run STO, save your loadout in space, enter the character and saved-loadout names, review the equipment, and confirm a new variation. See resources/app/docs/SHIP-CAPTURE-PREVIEW.md for limitations and instructions. This is a local preview, not a public release.
+Shipyard has **Capture my ship**. Run STO, save your loadout in space, enter the character and exact saved-loadout names, review the equipment, and confirm a new variation. This hotfix addresses downloaded-script startup, the validated October 9 STO client, and character-name search capacity. See resources/app/docs/RELEASE-0.6.8.1.md for details. Starting fresh without an existing data folder is supported.
 
 Extract the entire ZIP into a new writable folder, then open Shakedown.exe. Shakedown now opens in its own window, not your browser. Keep all the files in the package together.
 

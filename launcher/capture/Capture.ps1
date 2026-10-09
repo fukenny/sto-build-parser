@@ -5,13 +5,18 @@ $ErrorActionPreference='Stop'
 $stream=[IO.File]::OpenRead($client.Path)
 $sha=[Security.Cryptography.SHA256]::Create()
 try{$hash=[BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-','')}finally{$stream.Dispose();$sha.Dispose()}
-if($hash -ne '7FF876418B84891A171E246D70B22CADED96D4BBCC684AF27A67B3C2779ACD9D'){throw 'This STO client version is not supported by the experimental reader. No capture was imported.'}
+$supportedHashes=@(
+ '7FF876418B84891A171E246D70B22CADED96D4BBCC684AF27A67B3C2779ACD9D',
+ '767205C5B74A34B55BAED0BD1411FA41FF7205758A3CF99E802EA43C530CCE62'
+)
+if($hash -notin $supportedHashes){throw 'This STO client version is not supported by this Shakedown release. Check for a Shakedown update. No capture was imported.'}
 function Bytes([UInt64]$a,[int]$n){[StoProbe]::Read($client.Id,$a,$n)}
 function Ptr([UInt64]$a){[BitConverter]::ToUInt64((Bytes $a 8),0)}
 function Text([UInt64]$a){if(!$a){return ''};[Text.Encoding]::UTF8.GetString((Bytes $a 256)).Split([char]0)[0]}
 function ArrayPointers([UInt64]$a){if(!$a){return};$n=[BitConverter]::ToInt32((Bytes ($a-16) 4),0);if($n -lt 0 -or $n -gt 256){throw 'Invalid capture array'};if($n){$b=Bytes $a ($n*8);for($i=0;$i -lt $n;$i++){[BitConverter]::ToUInt64($b,$i*8)}}}
 $scan=[StoProbe]::Run($client.Id,@(($CharacterName+[char]0),($LoadoutName+[char]0)),30,8589934592)
 if($scan.StopReason -ne 'address-space-end'){throw 'Capture scan reached its limit. Try again with the loadout panel open.'}
+if($scan.CandidateLimitReached){throw 'Capture found too many matching names to complete the lookup. No capture was imported.'}
 $ships=@();$names=@()
 foreach($hit in $scan.Candidates){if($hit.Encoding -ne 'UTF-8'){continue};try{
  $a=[Convert]::ToUInt64($hit.Address.Substring(2),16);$name=Text $a
@@ -19,7 +24,7 @@ foreach($hit in $scan.Candidates){if($hit.Encoding -ne 'UTF-8'){continue};try{
  if($name -ceq $CharacterName){$p=Ptr ($a-20+320);if(!$p){continue};$b=Bytes $p 168;$id=[BitConverter]::ToUInt32($b,4);$type=[BitConverter]::ToUInt32($b,8);$ship=Text ([BitConverter]::ToUInt64($b,32));if($id -gt 0 -and $type -eq 21 -and $ship -and $ship.Length -lt 200){$ships+=[pscustomobject]@{id=[string]$id;name=$ship;swapTime=[BitConverter]::ToUInt32($b,96)}}}
 }catch{}}
 $ships=@($ships | Sort-Object id,name -Unique)
-if(!$ships.Count){throw 'No current ship reference found for that character. Enter space and check the character name.'}
+if(!$ships.Count){throw 'The reader could not resolve a ship reference for that character. Verify the character name; if already in space, this may be a reader limitation. No capture was imported.'}
 if(!$names.Count){throw 'Saved loadout name not found. Open its Loadouts panel and check the exact name.'}
 $refs=[StoProbe]::FindReferences($client.Id,[UInt64[]]$names,30,8589934592)
 if($refs.StopReason -ne 'address-space-end'){throw 'Loadout lookup reached its limit; no complete capture available.'}
@@ -33,7 +38,7 @@ $records=@(foreach($ref in $refs.References){try{
  }})
  if($items.Count -gt 0 -and $items.Count -le 256 -and @($items | Where-Object bag -eq 53).Count){[pscustomobject]@{name=$LoadoutName;lastSave=[BitConverter]::ToUInt32($b,140);items=$items}}
 }catch{}})
-if(!$records.Count){throw 'No populated ship loadout found. Save the loadout in STO, then try again.'}
+if(!$records.Count){throw 'The reader found the name but could not resolve a populated saved ship loadout. Check the exact current loadout name in STO. No capture was imported.'}
 . "$PSScriptRoot/Item-Details.ps1"
 Add-ItemDetails $records
 [pscustomobject]@{schemaVersion=1;capturedAt=[DateTime]::UtcNow.ToString('o');character=$CharacterName;executableHash=$hash;ships=$ships;records=@($records | Sort-Object lastSave -Descending);warning='Experimental memory capture. Older copies can remain. Confirm the ship and equipment before importing. Mark, rarity and modifiers are observed from matching item records now, not proven historical values at the loadout save time. Unresolved or conflicting details remain unavailable. Traits and bridge officer assignments are not captured.'} | ConvertTo-Json -Depth 10 -Compress

@@ -1,11 +1,61 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile} from 'node:fs/promises';
+import {mkdtemp,readFile,mkdir,writeFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {createStore} from '../lib/store.mjs';
-import {importSnapshot} from '../lib/ship-capture.mjs';
+import {captureShip,importSnapshot} from '../lib/ship-capture.mjs';
 import {equipmentMarkup,equipmentGroups} from '../public/ship-capture.js';
+
+test('memory name search passes 512 matches and reports its bounded limit',{skip:process.platform!=='win32'},async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'sto-name-search-'));
+ try{
+  const source=await readFile(new URL('../launcher/capture/Probe-Memory.ps1',import.meta.url),'utf8');
+  const csharp=source.match(/Add-Type -TypeDefinition @'\r?\n([\s\S]*?)\r?\n'@/)[1];
+  const script=path.join(root,'Search.ps1');
+  await writeFile(script,`$ErrorActionPreference='Stop'
+Add-Type -TypeDefinition @'
+${csharp}
+'@
+$needle=[Guid]::NewGuid().ToString('N')
+$bytes=[Text.Encoding]::UTF8.GetBytes(($needle+[char]0)*700)
+$memory=[Runtime.InteropServices.Marshal]::AllocHGlobal($bytes.Length)
+try {
+ [Runtime.InteropServices.Marshal]::Copy($bytes,0,$memory,$bytes.Length)
+ $scan=[StoProbe]::Run($PID,@($needle),30,2147483648)
+ $start=[UInt64]$memory.ToInt64();$end=$start+$bytes.Length
+ $hits=@($scan.Candidates | Where-Object { $address=[Convert]::ToUInt64($_.Address.Substring(2),16);$address -ge $start -and $address -lt $end })
+ $many=[Text.Encoding]::UTF8.GetBytes(($needle+[char]0)*9000)
+ $large=[Runtime.InteropServices.Marshal]::AllocHGlobal($many.Length)
+ try {
+  [Runtime.InteropServices.Marshal]::Copy($many,0,$large,$many.Length)
+  $limited=[StoProbe]::Run($PID,@($needle),30,2147483648)
+  @{count=$hits.Count;stop=$scan.StopReason;limited=$limited.CandidateLimitReached} | ConvertTo-Json -Compress
+ } finally { [Runtime.InteropServices.Marshal]::FreeHGlobal($large) }
+} finally { [Runtime.InteropServices.Marshal]::FreeHGlobal($memory) }
+`);
+  const {stdout}=await promisify(execFile)(path.join(process.env.SystemRoot,'System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',script],{windowsHide:true,timeout:90000});
+  const result=JSON.parse(stdout);assert.equal(result.count,700);assert.equal(result.stop,'address-space-end');assert.equal(result.limited,true);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('capture starts Internet-marked bundled scripts without changing persistent policy',{skip:process.platform!=='win32'},async()=>{
+ const root=await mkdtemp(path.join(os.tmpdir(),'sto-downloaded-capture-'));
+ try{
+  const dir=path.join(root,'launcher','capture');await mkdir(dir,{recursive:true});
+  const script=path.join(dir,'Capture.ps1');
+  const helper=path.join(dir,'Helper.ps1');
+  await writeFile(script,`param([string]$CharacterName,[string]$LoadoutName)\n. "$PSScriptRoot/Helper.ps1"\n`);
+  await writeFile(helper,`@{records=@(@{name=$LoadoutName});ships=@(@{name=$CharacterName})} | ConvertTo-Json -Compress\n`);
+  for(const file of [script,helper])await writeFile(file+':Zone.Identifier','[ZoneTransfer]\r\nZoneId=3\r\n');
+  const result=await captureShip(root,'Test Captain','Saved loadout');
+  assert.equal(result.ships[0].name,'Test Captain');
+  assert.equal(result.records[0].name,'Saved loadout');
+  assert.match(await readFile(script+':Zone.Identifier','utf8'),/ZoneId=3/);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
 
 test('observed ship equipment categories follow slots and keep unknown records separate',()=>{
  const records=[

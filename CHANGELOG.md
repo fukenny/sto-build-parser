@@ -1,3 +1,7 @@
+# v0.6.8.1 — Capture hotfix
+
+Fix downloaded-script startup, support the validated October 9 STO client, and prevent the 512-name-match cap from hiding the current ship. See docs/RELEASE-0.6.8.1.md and docs/VALIDATION-0.6.8.1.md.
+
 # v0.6.8 — Equipment capture
 
 Experimental saved-loadout snapshots, supported mark/rarity/modifiers, corrected categories, cleaner equipment display, and Discord/footer/log-folder polish. See docs/RELEASE-0.6.8.md. Equipment capture does not alter combat-log calculations.
